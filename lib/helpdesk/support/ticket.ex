@@ -3,6 +3,8 @@ defmodule Helpdesk.Support.Ticket do
     otp_app: :helpdesk,
     domain: Helpdesk.Support
 
+  alias Helpdesk.Support.Ticket.Types.Attachment
+
   actions do
     defaults [:read]
 
@@ -36,6 +38,12 @@ defmodule Helpdesk.Support.Ticket do
     attribute :status, :ticket_status do
       default :open
       allow_nil? false
+    end
+
+    attribute :attachments, {:array, Attachment} do
+      default []
+      allow_nil? true
+      public? true
     end
   end
 
