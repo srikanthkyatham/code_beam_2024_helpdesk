@@ -20,6 +20,9 @@ defmodule Mix.Tasks.Helpdesk.Generate.Task do
   * [domain] - Module name of the domain
   """
 
+  alias Sourceror.Zipper
+  require Logger
+
   def info(_argv, _composing_task) do
     %Igniter.Mix.Task.Info{
       example: @example,
@@ -126,37 +129,32 @@ defmodule Mix.Tasks.Helpdesk.Generate.Task do
 
   # do this if the module is enum
   # or if the attribute of the resource is enum
-  defp add_prepare_params_to_enum(igniter, modules) when is_list(modules) do
-    Enum.reduce(modules, igniter, fn module, igniter ->
-      # atoms = module.values()
+  # defp add_prepare_params_to_enum(igniter, modules) when is_list(modules) do
 
-      # find module
-      igniter
-      |> Igniter.Code.Module.find_and_update_module(module, fn zipper ->
-        # move zipper to respective place
+  def do_add_prepare_params_to_enum(igniter, module) do
+    path = Igniter.Project.Module.proper_location(igniter, module)
+
+    Igniter.update_elixir_file(igniter, path, fn zipper ->
+      with {:ok, zipper} <- Igniter.Code.Module.move_to_defmodule(zipper, module),
+           {:ok, zipper} <- Igniter.Code.Common.move_to_do_block(zipper) do
         new_code = """
         IO.inspect("New code from zipper update")
         """
 
-        pattern =
-          """
-          use Ash.Type.Enum, __
-             __cursor__()
-          """
+        zipper
+        |> Igniter.Code.Common.add_code(new_code, :after)
+      else
+        error ->
+          Logger.info("error #{inspect(error)}")
 
-        dbg()
+          {:warning, "...."}
+      end
+    end)
+  end
 
-        {:ok, zipper} =
-          zipper
-          |> Igniter.Code.Common.move_to_cursor(pattern)
-
-        updated_zipper =
-          zipper
-          |> Igniter.Code.Common.add_code(new_code, :after)
-
-        # add code
-        {:ok, updated_zipper}
-      end)
+  def add_prepare_params_to_enum(igniter, modules) do
+    Enum.reduce(modules, igniter, fn module, igniter ->
+      do_add_prepare_params_to_enum(igniter, module)
     end)
   end
 
