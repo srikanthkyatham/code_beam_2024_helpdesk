@@ -62,7 +62,6 @@ defmodule Mix.Tasks.Helpdesk.Generate.Task do
   # resource could be embedded in itself
 
   defp base_type_enum?({:array, resource} = _attribute, acc) do
-    dbg()
     base_type_enum?(resource, acc)
   end
 
@@ -81,7 +80,6 @@ defmodule Mix.Tasks.Helpdesk.Generate.Task do
   end
 
   defp enum_resource?(%Ash.Resource.Attribute{} = resource, acc) when is_list(acc) do
-    dbg()
     base_type_enum?(resource.type, acc)
   end
 
@@ -122,8 +120,6 @@ defmodule Mix.Tasks.Helpdesk.Generate.Task do
 
     all_enum_resources = Enum.concat(enum_resources, attribute_enum_resources)
 
-    dbg()
-
     igniter
     |> add_prepare_params_to_enum(all_enum_resources)
   end
@@ -144,11 +140,11 @@ defmodule Mix.Tasks.Helpdesk.Generate.Task do
 
         pattern =
           """
-          attributes do
-             __
-          end
-          ____cursor__()
+          use Ash.Type.Enum, __
+             __cursor__()
           """
+
+        dbg()
 
         {:ok, zipper} =
           zipper
