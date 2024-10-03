@@ -170,11 +170,11 @@ defmodule Mix.Tasks.Helpdesk.Generate.Task do
         end
 
         def to_strings(methods) when is_list(methods) do
-          Helpdesk.Utils.MethodToParam.to_methods(methods, &unquote(#{module}).to_method/1)
+          Helpdesk.Utils.MethodToParam.to_methods(methods, &#{module}.to_method/1)
         end
 
         def to_methods(params) do
-          Helpdesk.Utils.MethodToParam.to_methods(params, &unquote(#{module}).to_method/1)
+          Helpdesk.Utils.MethodToParam.to_methods(params, &#{module}.to_method/1)
         end
         """
 
