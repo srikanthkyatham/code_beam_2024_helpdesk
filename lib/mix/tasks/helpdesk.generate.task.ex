@@ -50,7 +50,8 @@ defmodule Mix.Tasks.Helpdesk.Generate.Task do
   # hard or can we fetch from the domain
   # generate live_view - based on
   #          - table
-  #                 - relationship table
+  #          - relationship table
+  #          - aggregates table
   #                 -
   # test module - copy the test setup - last
   #             - Ash.Generator
@@ -153,7 +154,7 @@ defmodule Mix.Tasks.Helpdesk.Generate.Task do
 
 
         def options do
-
+          #{inspect(values)}
         end
 
         def to_method(param) when is_binary(param) do
@@ -170,11 +171,11 @@ defmodule Mix.Tasks.Helpdesk.Generate.Task do
         end
 
         def to_strings(methods) when is_list(methods) do
-          Helpdesk.Utils.MethodToParam.to_methods(methods, &#{module}.to_method/1)
+          MethodToParam.to_methods(methods, &#{module}.to_method/1)
         end
 
         def to_methods(params) do
-          Helpdesk.Utils.MethodToParam.to_methods(params, &#{module}.to_method/1)
+          MethodToParam.to_methods(params, &#{module}.to_method/1)
         end
         """
 
