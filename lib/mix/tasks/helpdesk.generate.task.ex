@@ -20,7 +20,6 @@ defmodule Mix.Tasks.Helpdesk.Generate.Task do
   * [domain] - Module name of the domain
   """
 
-  alias Sourceror.Zipper
   require Logger
 
   def info(_argv, _composing_task) do
@@ -137,8 +136,46 @@ defmodule Mix.Tasks.Helpdesk.Generate.Task do
     Igniter.update_elixir_file(igniter, path, fn zipper ->
       with {:ok, zipper} <- Igniter.Code.Module.move_to_defmodule(zipper, module),
            {:ok, zipper} <- Igniter.Code.Common.move_to_do_block(zipper) do
+        # some macro stuff is needed
+
+        values =
+          Enum.map(module.values(), fn value ->
+            str = Atom.to_string(value)
+            {String.capitalize(str), str}
+          end)
+
+        dbg()
+
+        # only options is not working the other is working
+
         new_code = """
-        IO.inspect("New code from zipper update")
+        alias Helpdesk.Utils.MethodToParam
+
+
+        def options do
+
+        end
+
+        def to_method(param) when is_binary(param) do
+          String.to_existing_atom(param)
+        end
+
+        def to_method({_label, value} = param) when is_tuple(param) do
+          to_method(value)
+        end
+
+
+        def to_method(method) when is_atom(method) do
+          Atom.to_string(method)
+        end
+
+        def to_strings(methods) when is_list(methods) do
+          Helpdesk.Utils.MethodToParam.to_methods(methods, &unquote(#{module}).to_method/1)
+        end
+
+        def to_methods(params) do
+          Helpdesk.Utils.MethodToParam.to_methods(params, &unquote(#{module}).to_method/1)
+        end
         """
 
         zipper
