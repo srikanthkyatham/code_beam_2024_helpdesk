@@ -19,6 +19,7 @@ defmodule Mix.Tasks.Helpdesk.Generate.Task do
 
   * [domain] - Module name of the domain
   """
+  require Igniter.Code.Common
 
   require Logger
 
@@ -124,7 +125,8 @@ defmodule Mix.Tasks.Helpdesk.Generate.Task do
     all_enum_resources = Enum.concat(enum_resources, attribute_enum_resources)
 
     igniter
-    |> add_prepare_params_to_enum(all_enum_resources)
+    # |> add_prepare_params_to_enum(all_enum_resources)
+    |> add_form_components(resources)
   end
 
   # do this if the module is enum
@@ -196,31 +198,90 @@ defmodule Mix.Tasks.Helpdesk.Generate.Task do
     end)
   end
 
-  defp add_form_components(igniter, modules) when is_list(modules) do
-    ash_form_component = HelpdeskWeb.Components.AshFormComponent
+  defp for_every_mod_add_form1(zipper, module) do
+    # pattern = """
+    # def render_attribute_input(assigns, attribute, form, value, _name)
+    # """
+    # move_to_def - moves zipper to the do block
+    # need to
+    # all same arity fns needs to be aligned the generic one being at the last
+    # add_code after render_attribute_input/4
+    # add_code before render_attributes/5
+    # with {:ok, zipper} <- Igniter.Code.Function.move_to_def(zipper, :render_attribute_input, 5) do
+    with {:ok, zipper} <- Igniter.Code.Common.move_to_do_block(zipper) do
+      Logger.info("success in matching")
+
+      new_code = """
+      def render_attribute_input(
+        assigns,
+        %{type: #{module}} = attribute,
+        form,
+        value,
+        name
+      ) do
+        nested_fields = fields_of_resource(attribute.type)
+
+        updated_form =
+          add_form_if_needed(form, attribute)
+
+        assigns =
+          assign(assigns,
+            form: updated_form,
+            value: value,
+            name: name,
+            attribute: attribute,
+            nested_fields: nested_fields
+          )
+
+        ~H\"""
+          <div>
+            <.inputs_for :let={address_form} field={@form[@attribute.name]} id="address">
+              <.input type="text" field={address_form[:city]} />
+            </.inputs_for>
+          </div>
+        \"""
+      end
+      """
+
+      # how to move outside
+      zipper
+      |> Igniter.Code.Common.add_code(new_code, :after)
+    else
+      error ->
+        Logger.info("error #{inspect(error)}")
+        {:warning, "..."}
+    end
+  end
+
+  defp add_form_components(igniter, modules) do
+    ash_form_component = HelpdeskWeb.Components.Ash.FormComponentExt
+    path = Igniter.Project.Module.proper_location(igniter, ash_form_component)
 
     Enum.reduce(modules, igniter, fn module, igniter ->
-      igniter
-      |> Igniter.Code.Module.find_and_update_module(ash_form_component, fn zipper ->
-        # get the module and create the entry
-        # move zipper to respective place
-        # add code
-        {:ok, igniter}
+      Igniter.update_elixir_file(igniter, path, fn zipper ->
+        # group all changes of all modules
+        # Enum.reduce(modules, zipper, fn module, zipper ->
+        for_every_mod_add_form1(zipper, module)
+
+        # end)
       end)
     end)
   end
 
-  defp add_live_views(igniter, resources) when is_list(resources) do
+  defp add_live_view(igniter, module) do
+    # inject live specific stuff
+    # create the path
+    # add modules with the code for the respective
+  end
+
+  defp add_live_views(igniter, modules) when is_list(modules) do
     ash_table_component = HelpdeskWeb.Components.AshTableComponent
 
-    Enum.reduce(resources, igniter, fn resource, igniter ->
-      igniter
-      |> Igniter.Code.Module.find_and_update_module(ash_table_component, fn zipper ->
-        # get the module and create the entry
-        # move zipper to respective place
-        # add code
-        {:ok, igniter}
-      end)
+    Enum.reduce(modules, igniter, fn module, igniter ->
+      add_live_view(igniter, module)
     end)
+  end
+
+  def add_to_router(igniter, modules) do
   end
 end
