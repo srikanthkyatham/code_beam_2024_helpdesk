@@ -9,7 +9,6 @@ defmodule Mix.Tasks.Helpdesk.Generate.LiveView.Util do
 
   def get_module_heex_file_path(igniter, module, file_name) do
     module_name = get_module_name(igniter, module)
-    dbg()
     path = Igniter.Project.Module.proper_location(igniter, module_name)
     dirname = Path.dirname(path)
     Path.join([dirname, file_name])
