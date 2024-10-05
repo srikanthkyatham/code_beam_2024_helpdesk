@@ -78,14 +78,14 @@ defmodule Mix.Tasks.Helpdesk.Generate.LiveView.Index do
       @impl true
       def mount(params, _session, socket) do
         #org_slug = params["org_slug"]
-        #current_tenant = nil
+        current_tenant = nil
         read_options = Keyword.put([], :page, limit: @limit, offset: @offset)
 
         {:ok,
         socket
         |> assign(index_params: nil)
         #|> assign(:org_slug, org_slug)
-        #|> assign(:current_tenant, current_tenant)
+        |> assign(:current_tenant, current_tenant)
         |> assign(:domain, #{domain})
         |> assign(:resource, #{module})
         |> assign(:read_options, read_options)}
@@ -131,7 +131,8 @@ defmodule Mix.Tasks.Helpdesk.Generate.LiveView.Index do
 
       defp current_index_path(index_params, current_tenant) do
         index_params = index_params || %{}
-        EEx.eval_string("/app/org/<%= @current_tenant %>/#{module_plural_name}?<%= @index_params %>", assigns: [current_tenant: current_tenant, index_params: index_params])
+        # EEx.eval_string("/app/org/<%= @current_tenant %>/#{module_plural_name}?<%= @index_params %>", assigns: [current_tenant: current_tenant, index_params: index_params])
+        EEx.eval_string("/app/org/#{module_plural_name}?<%= @index_params %>", assigns: [index_params: index_params])
       end
 
       defp assign_#{module_plural_name}(socket, params) do
