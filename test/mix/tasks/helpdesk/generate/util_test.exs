@@ -20,5 +20,7 @@ defmodule Mix.Tasks.Helpdesk.Generate.UtilTest do
   end
 
   test "module_name_to_string_with_underscores" do
+    assert Util.module_name_to_string_with_underscores(Mix.Tasks.Helpdesk.Generate.UtilTest) ==
+             "util_test"
   end
 end
