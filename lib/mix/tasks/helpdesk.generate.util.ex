@@ -1,4 +1,16 @@
 defmodule Mix.Tasks.Helpdesk.Generate.Util do
+  def app_name(igniter) do
+    {app_name, _} = Igniter.Project.Application.app_module(igniter)
+
+    [elixir, app_name_module, _] =
+      app_name
+      |> Atom.to_string()
+      |> String.split(".")
+      |> dbg()
+
+    Module.safe_concat([elixir, app_name_module]) |> Atom.to_string()
+  end
+
   def web_module(igniter) do
     Igniter.Libs.Phoenix.web_module(igniter) |> Atom.to_string()
   end

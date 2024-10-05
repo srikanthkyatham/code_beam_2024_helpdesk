@@ -14,6 +14,7 @@ defmodule Mix.Tasks.Helpdesk.Generate.PrepareEnumResources do
     all_enum_resources = Enum.concat(enum_resources, attribute_enum_resources)
 
     igniter
+    |> add_method_to_param_module()
     |> add_prepare_params_to_enum(all_enum_resources)
   end
 
@@ -62,6 +63,7 @@ defmodule Mix.Tasks.Helpdesk.Generate.PrepareEnumResources do
   end
 
   def do_add_prepare_params_to_enum(igniter, module) do
+    app_name = app_name(igniter)
     path = Igniter.Project.Module.proper_location(igniter, module)
 
     Igniter.update_elixir_file(igniter, path, fn zipper ->
@@ -76,7 +78,7 @@ defmodule Mix.Tasks.Helpdesk.Generate.PrepareEnumResources do
         param_name = module_name_to_string_with_underscores(module)
 
         new_code = """
-        alias Helpdesk.Utils.MethodToParam
+        alias #{app_name}.Utils.MethodToParam
 
 
         def options do
@@ -126,9 +128,43 @@ defmodule Mix.Tasks.Helpdesk.Generate.PrepareEnumResources do
     end)
   end
 
-  def add_prepare_params_to_enum(igniter, modules) do
+  defp add_prepare_params_to_enum(igniter, modules) do
     Enum.reduce(modules, igniter, fn module, igniter ->
       do_add_prepare_params_to_enum(igniter, module)
     end)
+  end
+
+  defp add_method_to_param_module(igniter) do
+    code = """
+    def to_strings(methods, to_method) when is_list(methods) do
+      Enum.map(methods, fn method -> to_method.(method) end)
+    end
+
+    def to_strings(_methods, _to_method) do
+      []
+    end
+
+    def to_methods(params, to_method) when is_list(params) do
+      params
+      |> Enum.filter(fn param ->
+          case param do
+            "" -> false
+            _ -> true
+          end
+        end)
+    |> Enum.map(fn param ->
+        to_method.(param)
+       end)
+    end
+
+    def to_methods(%Phoenix.HTML.FormField{} = form_field, to_method) do
+      to_strings(form_field.value, to_method)
+    end
+    """
+
+    app_name = app_name(igniter)
+    dbg()
+    module_name = (app_name <> ".Utils.MethodToParam") |> string_to_module_name()
+    create_module(igniter, module_name, code)
   end
 end
