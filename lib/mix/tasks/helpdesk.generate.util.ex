@@ -6,7 +6,7 @@ defmodule Mix.Tasks.Helpdesk.Generate.Util do
   def table_component_name(igniter) do
     webmodule = web_module(igniter)
 
-    (webmodule <> ".Components.AshTableComponent") |> string_to_module_name()
+    (webmodule <> ".Ash.Table") |> string_to_module_name()
   end
 
   def string_to_module_name(module_name) do

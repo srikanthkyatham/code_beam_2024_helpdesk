@@ -23,7 +23,7 @@ defmodule Mix.Tasks.Helpdesk.Generate.LiveView.Index do
 
     code =
       """
-        <.container class="py-16">
+        <div>
           <.live_component
             id="#{id}"
             limit={10}
@@ -32,7 +32,7 @@ defmodule Mix.Tasks.Helpdesk.Generate.LiveView.Index do
             read_options={[{:tenant, @current_tenant}]}
             module={#{ash_table_component}}
             resource={#{module}}
-            resource_live_path={#{resource_live_path}}
+            resource_live_path={"#{resource_live_path}"}
             query={#{module}}
             api={#{domain}}
             resource_id={@resource_id}
@@ -40,7 +40,7 @@ defmodule Mix.Tasks.Helpdesk.Generate.LiveView.Index do
             tenant={@current_tenant}
             url={@url}
           />
-      </.container>
+      </div>
       """
 
     path = get_module_heex_file_path(igniter, module, "index.html.heex")
@@ -79,7 +79,7 @@ defmodule Mix.Tasks.Helpdesk.Generate.LiveView.Index do
       def mount(params, _session, socket) do
         org_slug = params["org_slug"]
         current_tenant = Reservation.Orgs.get_org!(org_slug).id
-        read_options = Keyword.put(read_options, :page, limit: @limit, offset: @offset)
+        read_options = Keyword.put([], :page, limit: @limit, offset: @offset)
 
         {:ok,
         socket
@@ -104,9 +104,12 @@ defmodule Mix.Tasks.Helpdesk.Generate.LiveView.Index do
 
       defp apply_action(socket, :edit, %{"id" => id}) do
         current_tenant = socket.assigns.current_tenant
+        domain = socket.assigns.domain
+        read_options = socket.assigns.read_options
+        resource = socket.assigns.resource
 
         record =
-        api.get!(resource, id, all_read_options)
+        domain.get!(resource, id, read_options)
 
         socket
         |> assign(:page_title, "Edit #{title}")
@@ -134,8 +137,10 @@ defmodule Mix.Tasks.Helpdesk.Generate.LiveView.Index do
       defp assign_#{module_plural_name}(socket, params) do
         resource = socket.assigns.resource
         read_options = socket.assigns.read_options
+        domain = socket.assigns.domain
+
         records = resource
-                  |> api.read!(read_options)
+                  |> domain.read!(read_options)
 
         assign(socket, records: records)
       end
