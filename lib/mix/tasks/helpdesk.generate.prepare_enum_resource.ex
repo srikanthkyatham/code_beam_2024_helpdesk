@@ -11,7 +11,7 @@ defmodule Mix.Tasks.Helpdesk.Generate.PrepareEnumResources do
         get_attributes_enum(resource, acc)
       end)
 
-    all_enum_resources = Enum.concat(enum_resources, attribute_enum_resources)
+    all_enum_resources = Enum.concat(enum_resources, attribute_enum_resources) |> Enum.uniq()
 
     igniter
     |> add_method_to_param_module()
