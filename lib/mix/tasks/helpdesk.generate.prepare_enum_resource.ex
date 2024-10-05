@@ -72,6 +72,8 @@ defmodule Mix.Tasks.Helpdesk.Generate.PrepareEnumResources do
             {String.capitalize(str), str}
           end)
 
+        param_name = module_name_to_string_with_underscores(module)
+
         new_code = """
         alias Helpdesk.Utils.MethodToParam
 
@@ -100,6 +102,16 @@ defmodule Mix.Tasks.Helpdesk.Generate.PrepareEnumResources do
         def to_methods(params) do
           MethodToParam.to_methods(params, &#{module}.to_method/1)
         end
+
+        def prepare_params(params, _) do
+          atomised =
+            params
+            |> Map.get("#{param_name}", [])
+            |> to_methods()
+
+          Map.put(params, "#{param_name}", atomised)
+        end
+
         """
 
         zipper
@@ -117,5 +129,15 @@ defmodule Mix.Tasks.Helpdesk.Generate.PrepareEnumResources do
     Enum.reduce(modules, igniter, fn module, igniter ->
       do_add_prepare_params_to_enum(igniter, module)
     end)
+  end
+
+  def module_name_to_string_with_underscores(module_name) do
+    list = Module.split(module_name)
+    actual_name = List.last(list)
+
+    Regex.split(~r/(?=[A-Z])/, actual_name)
+    |> Enum.reject(fn str -> str == "" end)
+    |> Enum.map(fn str -> String.downcase(str) end)
+    |> Enum.join("_")
   end
 end
