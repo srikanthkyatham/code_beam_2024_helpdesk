@@ -14,7 +14,6 @@ defmodule Mix.Tasks.Helpdesk.Generate.LiveView.Index do
     # add modules with the code for the respective
     # more deduction
     # create index, show, form
-    web_module = web_module(igniter)
     ash_table_component = table_component_name(igniter)
 
     # module plural name
@@ -25,22 +24,22 @@ defmodule Mix.Tasks.Helpdesk.Generate.LiveView.Index do
     code =
       """
         <.container class="py-16">
-        <.live_component
-          id="#{id}"
-          limit={10}
-          offset={0}
-          sort={{"id", :asc}}
-          read_options={[{:tenant, @current_tenant}]}
-          module={#{ash_table_component}}
-          resource={#{module}}
-          resource_live_path={#{resource_live_path}}
-          query={#{module}}
-          api={#{domain}}
-          resource_id={@resource_id}
-          live_action={@live_action}
-          tenant={@current_tenant}
-          url={@url}
-        />
+          <.live_component
+            id="#{id}"
+            limit={10}
+            offset={0}
+            sort={{"id", :asc}}
+            read_options={[{:tenant, @current_tenant}]}
+            module={#{ash_table_component}}
+            resource={#{module}}
+            resource_live_path={#{resource_live_path}}
+            query={#{module}}
+            api={#{domain}}
+            resource_id={@resource_id}
+            live_action={@live_action}
+            tenant={@current_tenant}
+            url={@url}
+          />
       </.container>
       """
 
@@ -70,6 +69,9 @@ defmodule Mix.Tasks.Helpdesk.Generate.LiveView.Index do
       use #{web_module}, :live_view
       alias #{module}
 
+      @limit 10
+      @offset 10
+
       require Ash.Sort
       require Logger
 
@@ -77,7 +79,7 @@ defmodule Mix.Tasks.Helpdesk.Generate.LiveView.Index do
       def mount(params, _session, socket) do
         org_slug = params["org_slug"]
         current_tenant = Reservation.Orgs.get_org!(org_slug).id
-        read_options = Keyword.put(read_options, :page, limit: limit, offset: offset)
+        read_options = Keyword.put(read_options, :page, limit: @limit, offset: @offset)
 
         {:ok,
         socket
@@ -85,6 +87,7 @@ defmodule Mix.Tasks.Helpdesk.Generate.LiveView.Index do
         |> assign(:org_slug, org_slug)
         |> assign(:current_tenant, current_tenant)
         |> assign(:domain, #{domain})
+        |> assign(:resource, #{module})
         |> assign(:read_options, read_options)}
       end
 
@@ -124,13 +127,19 @@ defmodule Mix.Tasks.Helpdesk.Generate.LiveView.Index do
       end
 
       defp current_index_path(index_params, current_tenant) do
-        ~p"/app/org/<%% current_tenant %>/#{module_plural_name}?<%% index_params %> || %{}}"
+        index_params = index_params || %{}
+        EEx.eval_string("/app/org/<%= @current_tenant %>/#{module_plural_name}?<%= @index_params %>", assigns: [current_tenant: current_tenant, index_params: index_params])
       end
 
+      defp assign_#{module_plural_name}(socket, params) do
+        resource = socket.assigns.resource
+        read_options = socket.assigns.read_options
+        records = resource
+                  |> api.read!(read_options)
 
+        assign(socket, records: records)
+      end
       """
-
-    web_module = web_module(igniter)
 
     index_module = get_module_name(igniter, module)
 

@@ -17,6 +17,6 @@ defmodule Mix.Tasks.Helpdesk.Generate.LiveView.Util do
 
   def get_plural_module_name(module) do
     base_module_name = get_module_base_name(module)
-    base_module_name <> "s"
+    (base_module_name <> "s") |> String.downcase()
   end
 end
