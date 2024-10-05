@@ -77,15 +77,15 @@ defmodule Mix.Tasks.Helpdesk.Generate.LiveView.Index do
 
       @impl true
       def mount(params, _session, socket) do
-        org_slug = params["org_slug"]
-        current_tenant = Reservation.Orgs.get_org!(org_slug).id
+        #org_slug = params["org_slug"]
+        #current_tenant = nil
         read_options = Keyword.put([], :page, limit: @limit, offset: @offset)
 
         {:ok,
         socket
         |> assign(index_params: nil)
-        |> assign(:org_slug, org_slug)
-        |> assign(:current_tenant, current_tenant)
+        #|> assign(:org_slug, org_slug)
+        #|> assign(:current_tenant, current_tenant)
         |> assign(:domain, #{domain})
         |> assign(:resource, #{module})
         |> assign(:read_options, read_options)}
@@ -103,7 +103,7 @@ defmodule Mix.Tasks.Helpdesk.Generate.LiveView.Index do
       end
 
       defp apply_action(socket, :edit, %{"id" => id}) do
-        current_tenant = socket.assigns.current_tenant
+        #current_tenant = socket.assigns.current_tenant
         domain = socket.assigns.domain
         read_options = socket.assigns.read_options
         resource = socket.assigns.resource

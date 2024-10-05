@@ -37,11 +37,9 @@ defmodule Mix.Tasks.Helpdesk.Generate.Task do
 
     igniter
     |> Igniter.assign(domain: domain)
-    # |> Mix.Tasks.Helpdesk.Generate.PrepareEnumResources.prepare_enum_resources(resources)
+    |> Mix.Tasks.Helpdesk.Generate.PrepareEnumResources.prepare_enum_resources(resources)
     |> Mix.Tasks.Helpdesk.Generate.FormComponent.add_all_form_modules(resources)
-
-    # |> add_form_components(resources)
-    # |> add_live_views(resources)
+    |> Mix.Tasks.Helpdesk.Generate.LiveView.add_live_views(domain, resources)
   end
 
   defp domain(domain) when is_binary(domain) do

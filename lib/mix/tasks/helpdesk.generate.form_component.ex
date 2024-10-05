@@ -60,8 +60,8 @@ defmodule Mix.Tasks.Helpdesk.Generate.FormComponent do
 
         ~H\"""
           <div>
-              <%= for attribute <- @attribute do %>
-                <%= #{form_component}.render_attribute_input(assigns, attribute, @form, nil, nil) %>
+              <%= for child_attribute <- @attribute do %>
+                <%= #{form_component}.render_attribute_input(assigns, child_attribute, @form, nil, nil) %>
               <% end %>
           </div>
         \"""
@@ -84,8 +84,12 @@ defmodule Mix.Tasks.Helpdesk.Generate.FormComponent do
     ) do
       # could be composite or built_in
       if Ash.Type.builtin?(#{module}) do
+      assigns =
+        assign(assigns,
+          attribute: attribute)
+
         ~H\"""
-          <%= render_array_attribute_input(assigns, attribute, @form, nil, nil) %>
+          <%= render_array_attribute_input(assigns, @attribute, @form, nil, nil) %>
         \"""
 
       else
