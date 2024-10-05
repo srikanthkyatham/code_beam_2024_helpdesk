@@ -35,3 +35,6 @@ helpdesk-*.tar
 npm-debug.log
 /assets/node_modules/
 
+Ash_Readme.md
+EEX.md
+Igniter.md
