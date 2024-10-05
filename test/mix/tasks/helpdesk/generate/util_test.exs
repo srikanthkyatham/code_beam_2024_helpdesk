@@ -1,6 +1,14 @@
 defmodule Mix.Tasks.Helpdesk.Generate.UtilTest do
   use ExUnit.Case
   alias Mix.Tasks.Helpdesk.Generate.Util
+  import Igniter.Test
+
+  # :skip
+
+  # test "app_name" do
+  #   igniter = test_project(app_name: :helpdesk)
+  #   assert Util.app_name(igniter) == "Elixir.Helpdesk"
+  # end
 
   test "web_module as string" do
   end
