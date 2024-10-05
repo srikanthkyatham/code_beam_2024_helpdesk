@@ -40,6 +40,56 @@ defmodule Mix.Tasks.Helpdesk.Generate.FormComponent do
       new_code = """
       def render_attribute_input(
         assigns,
+        %{type: {:array, #{module}}} = attribute,
+        form,
+        value,
+        name
+      ) do
+        # could be composite or built_in
+        updated_form =
+          add_form_if_needed(form, attribute)
+
+        assigns =
+          assign(assigns,
+            form: updated_form,
+            value: value,
+            name: name,
+            attribute: attribute,
+            nested_fields: nested_fields
+          )
+
+
+        if Ash.Type.builtin?(#{module}) do
+          ~H\"""
+            <div>
+                <%= for attribute <- @attribute do %>
+                  <%= #{form_component}.render_attribute_input(assigns, attribute, @form, nil, nil) %>
+                <% end %>
+            </div>
+          \"""
+
+        else
+          nested_fields = fields_of_resource(attribute.type)
+          assigns =
+            assign(assigns,
+              nested_fields: nested_fields
+            )
+
+          ~H\"""
+            <div>
+              <.inputs_for :let={nested_form} field={@form[@attribute.name]} id={@name}>
+                <%= for nested_field <- @nested_fields do %>
+                  <%= #{form_component}.render_attribute_input(assigns, nested_field, nested_form, nil, nil) %>
+                <% end %>
+              </.inputs_for>
+            </div>
+          \"""
+        end
+
+      end
+
+      def render_attribute_input(
+        assigns,
         %{type: #{module}} = attribute,
         form,
         value,
@@ -157,6 +207,7 @@ defmodule Mix.Tasks.Helpdesk.Generate.FormComponent do
     Igniter.Code.Module.parse("#{web_module}.Ash.FormComponent")
   end
 
+  # issues with compilation
   defp add_core_form_component(igniter) do
     web_module = web_module(igniter)
 
