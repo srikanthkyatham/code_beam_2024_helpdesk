@@ -25,4 +25,8 @@ defmodule Mix.Tasks.Helpdesk.Generate.Util do
       code
     )
   end
+
+  def get_module_base_name(module) do
+    Module.split(module) |> List.last()
+  end
 end

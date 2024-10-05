@@ -26,7 +26,8 @@ defmodule Mix.Tasks.Helpdesk.Generate.LiveView do
     Igniter.Code.Module.parse("#{web_module}.live.#{module}live.Index")
 
     # module plural name
-    module_plural_name = ""
+    base_module_name = get_module_base_name(module)
+    module_plural_name = base_module_name <> "s"
     id = "#{module_plural_name}_id"
     resource_live_path = module_plural_name
 
@@ -76,9 +77,8 @@ defmodule Mix.Tasks.Helpdesk.Generate.LiveView do
 
   defp get_module_name(igniter, module) do
     web_module = web_module(igniter)
-    module_name = Module.split(module) |> List.last()
-    # Module.safe_concat([web_module, Live, module, Index])
-    Igniter.Code.Module.parse("#{web_module}.Live.#{module_name}Live.Index")
+    base_module_name = get_module_base_name(module)
+    Igniter.Code.Module.parse("#{web_module}.Live.#{base_module_name}Live.Index")
   end
 
   defp get_module_heex_file_path(igniter, module, file_name) do
