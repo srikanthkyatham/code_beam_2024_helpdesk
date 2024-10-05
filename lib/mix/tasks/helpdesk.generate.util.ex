@@ -17,4 +17,12 @@ defmodule Mix.Tasks.Helpdesk.Generate.Util do
         String.to_atom(module_name)
     end
   end
+
+  def create_module(igniter, module_name, code) do
+    igniter
+    |> Igniter.Code.Module.create_module(
+      module_name,
+      code
+    )
+  end
 end

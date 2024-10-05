@@ -157,8 +157,7 @@ defmodule Mix.Tasks.Helpdesk.Generate.FormComponent do
     webmodule = web_module(igniter)
     form_helper_module_name = (webmodule <> ".Ash.FormHelper") |> string_to_module_name()
 
-    igniter
-    |> Igniter.Code.Module.create_module(form_helper_module_name, """
+    create_module(igniter, form_helper_module_name, """
     def fields_of_resource(resource) do
       resource
       |> Ash.Resource.Info.attributes()
@@ -198,22 +197,18 @@ defmodule Mix.Tasks.Helpdesk.Generate.FormComponent do
     webmodule = web_module(igniter)
     form_component_ext = form_component_ext_name(igniter)
 
-    igniter
-    |> Igniter.Code.Module.create_module(
-      form_component_ext,
-      """
-      use Phoenix.LiveComponent
+    create_module(igniter, form_component_ext, """
+    use Phoenix.LiveComponent
 
-      use Phoenix.VerifiedRoutes,
-      endpoint: #{webmodule}.Endpoint,
-      router: #{webmodule}.Router,
-      statics: #{webmodule}.static_paths()
+    use Phoenix.VerifiedRoutes,
+    endpoint: #{webmodule}.Endpoint,
+    router: #{webmodule}.Router,
+    statics: #{webmodule}.static_paths()
 
-      import #{webmodule}.CoreComponents
-      import #{webmodule}.Ash.FormHelper
+    import #{webmodule}.CoreComponents
+    import #{webmodule}.Ash.FormHelper
 
-      """
-    )
+    """)
   end
 
   defp form_component_ext_name(igniter) do
