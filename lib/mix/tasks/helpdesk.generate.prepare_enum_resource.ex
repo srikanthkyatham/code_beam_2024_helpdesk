@@ -163,7 +163,6 @@ defmodule Mix.Tasks.Helpdesk.Generate.PrepareEnumResources do
     """
 
     app_name = app_name(igniter)
-    dbg()
     module_name = (app_name <> ".Utils.MethodToParam") |> string_to_module_name()
     create_module(igniter, module_name, code)
   end

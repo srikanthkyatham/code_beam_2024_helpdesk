@@ -6,7 +6,6 @@ defmodule Mix.Tasks.Helpdesk.Generate.Util do
       app_name
       |> Atom.to_string()
       |> String.split(".")
-      |> dbg()
 
     Module.safe_concat([elixir, app_name_module]) |> Atom.to_string()
   end

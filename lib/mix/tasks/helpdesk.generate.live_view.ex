@@ -13,7 +13,7 @@ defmodule Mix.Tasks.Helpdesk.Generate.LiveView do
     # show
     # index
     # form
-    modules = [List.first(modules)]
+    # modules = [List.first(modules)]
 
     Enum.reduce(modules, igniter, fn module, igniter ->
       Mix.Tasks.Helpdesk.Generate.LiveView.Index.add_index_files(igniter, domain, module)
