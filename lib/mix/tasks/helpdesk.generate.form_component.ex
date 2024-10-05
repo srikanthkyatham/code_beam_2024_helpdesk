@@ -19,10 +19,16 @@ defmodule Mix.Tasks.Helpdesk.Generate.FormComponent do
     if exists do
       path = Igniter.Project.Module.proper_location(igniter, form_component_ext)
 
-      Enum.reduce(modules, igniter, fn module, igniter ->
-        Igniter.update_elixir_file(igniter, path, fn zipper ->
-          for_every_module_add_form(igniter, zipper, module)
+      igniter =
+        Enum.reduce(modules, igniter, fn module, igniter ->
+          Igniter.update_elixir_file(igniter, path, fn zipper ->
+            for_every_module_add_form(igniter, zipper, module)
+          end)
         end)
+
+      # default renders for builts in
+      Igniter.update_elixir_file(igniter, path, fn zipper ->
+        add_render_for_array_of_builts(igniter, zipper)
       end)
     else
       igniter
@@ -31,72 +37,60 @@ defmodule Mix.Tasks.Helpdesk.Generate.FormComponent do
     end
   end
 
+  defp add_render_for_array_of_builts(igniter, zipper) do
+    form_component = form_component_name(igniter)
+
+    new_code = """
+    def render_array_attribute_input(
+      assigns,
+      %{type: {:array, _builtin_type}} = attribute,
+      form,
+      value,
+      name
+    ) do
+      updated_form =
+        add_form_if_needed(form, attribute)
+
+      assigns =
+        assign(assigns,
+          form: updated_form,
+          value: value,
+          name: name,
+          attribute: attribute,
+        )
+
+        ~H\"""
+          <div>
+              <%= for attribute <- @attribute do %>
+                <%= #{form_component}.render_attribute_input(assigns, attribute, @form, nil, nil) %>
+              <% end %>
+          </div>
+        \"""
+    end
+    """
+
+    add_code_to_zipper(zipper, new_code)
+  end
+
   defp for_every_module_add_form(igniter, zipper, module) do
     form_component = form_component_name(igniter)
 
-    with {:ok, zipper} <- Igniter.Code.Common.move_to_do_block(zipper) do
-      Logger.info("success in matching")
-      # for
-      new_code = """
-      def render_attribute_input(
-        assigns,
-        %{type: {:array, #{module}}} = attribute,
-        form,
-        value,
-        name
-      ) do
-        # could be composite or built_in
-        updated_form =
-          add_form_if_needed(form, attribute)
+    new_code = """
+    def render_attribute_input(
+      assigns,
+      %{type: {:array, #{module}}} = attribute,
+      form,
+      value,
+      name
+    ) do
+      # could be composite or built_in
+      if Ash.Type.builtin?(#{module}) do
+        ~H\"""
+          <%= render_array_attribute_input(assigns, attribute, @form, nil, nil) %>
+        \"""
 
-        assigns =
-          assign(assigns,
-            form: updated_form,
-            value: value,
-            name: name,
-            attribute: attribute,
-            nested_fields: nested_fields
-          )
-
-
-        if Ash.Type.builtin?(#{module}) do
-          ~H\"""
-            <div>
-                <%= for attribute <- @attribute do %>
-                  <%= #{form_component}.render_attribute_input(assigns, attribute, @form, nil, nil) %>
-                <% end %>
-            </div>
-          \"""
-
-        else
-          nested_fields = fields_of_resource(attribute.type)
-          assigns =
-            assign(assigns,
-              nested_fields: nested_fields
-            )
-
-          ~H\"""
-            <div>
-              <.inputs_for :let={nested_form} field={@form[@attribute.name]} id={@name}>
-                <%= for nested_field <- @nested_fields do %>
-                  <%= #{form_component}.render_attribute_input(assigns, nested_field, nested_form, nil, nil) %>
-                <% end %>
-              </.inputs_for>
-            </div>
-          \"""
-        end
-
-      end
-
-      def render_attribute_input(
-        assigns,
-        %{type: #{module}} = attribute,
-        form,
-        value,
-        name
-      ) do
+      else
         nested_fields = fields_of_resource(attribute.type)
-
         updated_form =
           add_form_if_needed(form, attribute)
 
@@ -108,7 +102,6 @@ defmodule Mix.Tasks.Helpdesk.Generate.FormComponent do
             attribute: attribute,
             nested_fields: nested_fields
           )
-
 
         ~H\"""
           <div>
@@ -120,18 +113,44 @@ defmodule Mix.Tasks.Helpdesk.Generate.FormComponent do
           </div>
         \"""
       end
-      """
 
-      # find every attribute and
-
-      # how to move outside
-      zipper
-      |> Igniter.Code.Common.add_code(new_code, :after)
-    else
-      error ->
-        Logger.info("error #{inspect(error)}")
-        {:warning, "..."}
     end
+
+    def render_attribute_input(
+      assigns,
+      %{type: #{module}} = attribute,
+      form,
+      value,
+      name
+    ) do
+      nested_fields = fields_of_resource(attribute.type)
+
+      updated_form =
+        add_form_if_needed(form, attribute)
+
+      assigns =
+        assign(assigns,
+          form: updated_form,
+          value: value,
+          name: name,
+          attribute: attribute,
+          nested_fields: nested_fields
+        )
+
+
+      ~H\"""
+        <div>
+          <.inputs_for :let={nested_form} field={@form[@attribute.name]} id={@name}>
+            <%= for nested_field <- @nested_fields do %>
+              <%= #{form_component}.render_attribute_input(assigns, nested_field, nested_form, nil, nil) %>
+            <% end %>
+          </.inputs_for>
+        </div>
+      \"""
+    end
+    """
+
+    add_code_to_zipper(zipper, new_code)
   end
 
   defp add_form_helper(igniter) do
@@ -229,5 +248,16 @@ defmodule Mix.Tasks.Helpdesk.Generate.FormComponent do
       Igniter.Project.Module.proper_location(igniter, form_module_name),
       assigns
     )
+  end
+
+  defp add_code_to_zipper(zipper, new_code) do
+    with {:ok, zipper} <- Igniter.Code.Common.move_to_do_block(zipper) do
+      zipper
+      |> Igniter.Code.Common.add_code(new_code, :after)
+    else
+      error ->
+        Logger.info("error #{inspect(error)}")
+        {:warning, "..."}
+    end
   end
 end
