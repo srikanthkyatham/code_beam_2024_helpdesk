@@ -29,4 +29,17 @@ defmodule Mix.Tasks.Helpdesk.Generate.Util do
   def get_module_base_name(module) do
     Module.split(module) |> List.last()
   end
+
+  def split_module_name(module) do
+    actual_name = get_module_base_name(module)
+
+    Regex.split(~r/(?=[A-Z])/, actual_name)
+    |> Enum.reject(fn str -> str == "" end)
+  end
+
+  def module_name_to_string_with_underscores(module_name) do
+    split_module_name(module_name)
+    |> Enum.map(fn str -> String.downcase(str) end)
+    |> Enum.join("_")
+  end
 end

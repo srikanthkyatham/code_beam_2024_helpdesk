@@ -1,5 +1,6 @@
 defmodule Mix.Tasks.Helpdesk.Generate.PrepareEnumResources do
   require Logger
+  import Mix.Tasks.Helpdesk.Generate.Util
 
   def prepare_enum_resources(igniter, resources) do
     enum_resources = get_enum_resources(resources)
@@ -129,15 +130,5 @@ defmodule Mix.Tasks.Helpdesk.Generate.PrepareEnumResources do
     Enum.reduce(modules, igniter, fn module, igniter ->
       do_add_prepare_params_to_enum(igniter, module)
     end)
-  end
-
-  def module_name_to_string_with_underscores(module_name) do
-    list = Module.split(module_name)
-    actual_name = List.last(list)
-
-    Regex.split(~r/(?=[A-Z])/, actual_name)
-    |> Enum.reject(fn str -> str == "" end)
-    |> Enum.map(fn str -> String.downcase(str) end)
-    |> Enum.join("_")
   end
 end
