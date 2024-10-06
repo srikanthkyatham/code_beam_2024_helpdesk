@@ -43,22 +43,24 @@ defmodule Mix.Tasks.Helpdesk.Generate.LiveView.Index do
 
       """
 
-    attributes = resource_attributes(module)
+    attributes = resource_attributes(module) |> prune_attributes()
+
+    # remove attributes which are relationship, or embedded or array
 
     code_middle = """
     """
 
+    # TODO: This is not working
     code_middle =
       Enum.reduce(attributes, code_middle, fn attribute, acc ->
         # generate
         name = attribute.name |> Atom.to_string()
         label = name |> String.capitalize()
 
-        """
+        col_row = """
         <:col :let={record} label="#{label}"><%= record.#{name} %></:col>
         """
 
-        col_row = ""
         acc <> col_row
       end)
 
@@ -216,5 +218,20 @@ defmodule Mix.Tasks.Helpdesk.Generate.LiveView.Index do
     index_module = get_module_name(igniter, module)
 
     create_module(igniter, index_module, code)
+  end
+
+  defp base_type?({:array, _resource} = _attribute) do
+    false
+  end
+
+  defp base_type?(_resource) do
+    true
+  end
+
+  # TODO: fix this
+  defp prune_attributes(attributes) do
+    Enum.reject(attributes, fn attribute ->
+      Ash.Type.embedded_type?(attribute.type) || !base_type?(attribute)
+    end)
   end
 end
