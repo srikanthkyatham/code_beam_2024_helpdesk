@@ -1,308 +1,157 @@
-defmodule HelpdeskWeb.Ash.Table do
-  @moduledoc false
+defmodule AshTable.Table do
   use Phoenix.LiveComponent
 
-  use Phoenix.VerifiedRoutes,
-    endpoint: HelpdeskWeb.Endpoint,
-    router: HelpdeskWeb.Router,
-    statics: HelpdeskWeb.static_paths()
+  alias AshTable.TableHelpers
 
-  alias Phoenix.LiveView.JS
-  # import HelpdeskWeb.CoreComponents
-  alias HelpdeskWeb.RowComponent
+  @moduledoc """
+    Generic sortable table component
 
-  require Ash.Query
+    Expects the following parameters as assigns:
 
-  attr(:path, :string, required: true)
-  attr(:name, :string, required: true)
-  attr(:icon, :string, required: true)
-  attr(:phxclick, :any, required: true)
-  attr(:disabled, :boolean, required: true)
-  # <wbutton path={"#{@resource_live_path}/new"} name="Create" icon="hero-plus" disabled={false}/>
-  # <wbutton path={"#{@resource_live_path}/#{@selected_rows |> hd |> elem(0)}/edit"} name="Create" icon="hero-pencil" disabled={not @can_edit?} />
-  # <wbutton path={"#{@resource_live_path}/#{@selected_rows |> hd |> elem(0)}/edit"} name="Create" icon="hero-pencil" disabled={not @can_edit?} />
+    * `id` - necessary, as this is a stateful LiveView component
+    * `query` - An Ash Query or Resource module
+    * `sort` (optional) - a `t:sort/0` specifying the initial sort direction
+    * `limit` - page size
+    * `offset` - initial offset for pagination
+    * `col` columns
+      * attribute - the field this column displays, used to sort
+      * apply_sort - optional arity 2 function which takes query, direction as args
+    * `caption` (optional)
+    * `read_options` - an options keyword list of options that will be passed into `Ash.read` when data is fetched.
+    This allows for specifying `:tenant`, `:actor`, etc.
+    * `path` path to return on modal cancel
+    * `url` whole url
 
-  def wbutton(assigns) do
-    ~H"""
-    <button
-      phx-click={@phxclick}
-      type="button"
-      class="rounded bg-white px-3 py-1 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-    >
-      <icon name={@icon} class="h-4 -mt-1" />{@name}
-    </button>
-    """
+  """
+
+  @assigns [
+    :id,
+    :sort,
+    :query,
+    :col,
+    :offset,
+    :limit,
+    :read_options,
+    :path,
+    :url
+  ]
+
+  @default_assigns %{
+    limit: 10,
+    offset: 0,
+    read_options: []
+  }
+
+  @type sort :: {atom | nil, :asc | :desc}
+
+  @impl true
+  def mount(socket) do
+    socket
+    |> assign(sort: {nil, :asc})
+    |> then(&{:ok, &1})
   end
 
-  attr(:resource, :atom)
-  attr(:resource_live_path, :string)
-  attr(:record, :any)
-
-  def render(assigns) do
-    ~H"""
-    <div class="overflow-y-auto px-4 sm:overflow-visible sm:px-0">
-      <table class="w-[40rem] mt-11 sm:w-full">
-        <thead class="text-sm text-left leading-6 text-zinc-500">
-          <tr>
-            <th
-              :for={{col, i} <- @cols |> Enum.with_index()}
-              phx-click="sort"
-              phx-value-index={i}
-              phx-target={@myself}
-              style={"width: #{col.width}px"}
-              data={[index: i]}
-            >
-              <%= col.title %>
-              <.sort_icon col={col} />
-            </th>
-          </tr>
-        </thead>
-        <tbody class="relative divide-y divide-zinc-100 border-t border-zinc-200 text-sm leading-6 text-zinc-700">
-          <%= if @records == [] do %>
-            <tr class="group hover:bg-zinc-50">
-              <td colspan={length(@cols)}>
-                <%= if @if_empty, do: render_slot(@if_empty), else: "No results" %>
-              </td>
-            </tr>
-          <% end %>
-          <.live_component
-            :for={record <- @records}
-            module={RowComponent}
-            id={"row-#{record.id}"}
-            record={record}
-            cols={@cols}
-            editing_cell={@editing_cell}
-            phx-click="start_edit_cell"
-            phx-value-row_id={record.id}
-            parent={@myself}
-          />
-        </tbody>
-      </table>
-
-      <modal
-        :if={@live_action in [:new, :edit]}
-        id="modal"
-        show
-        on_cancel={JS.patch("#{@resource_live_path}")}
-      >
-        <.live_component
-          module={HelpdeskWeb.PetalAshFormComponent}
-          resource={@resource}
-          live_action={@live_action}
-          record={@record}
-          api={@api}
-          id="form"
-          name="book"
-          tenant={@tenant}
-          resource_live_path={@resource_live_path}
-          url={@url}
-        />
-      </modal>
-    </div>
-    """
-  end
-
-  def update(%{select_row: row}, socket) do
-    selected_rows = [row | socket.assigns.selected_rows]
-
-    {:ok,
-     socket
-     |> assign(:selected_rows, selected_rows)
-     |> assign(:can_edit?, length(selected_rows) == 1)
-     |> assign(:can_delete?, length(selected_rows) > 0)}
-  end
-
-  def update(%{unselect_row: record_id}, socket) do
-    selected_rows = Enum.reject(socket.assigns.selected_rows, fn {id, _} -> id == record_id end)
-
-    {:ok,
-     socket
-     |> assign(:selected_rows, selected_rows)
-     |> assign(:can_edit?, length(selected_rows) == 1)
-     |> assign(:can_delete?, length(selected_rows) > 0)}
-  end
-
+  @impl true
   def update(assigns, socket) do
-    socket =
-      socket
-      |> assign(assigns)
-      |> assign_new(:selected_rows, fn -> [] end)
-      |> assign_new(:can_edit?, fn -> false end)
-      |> assign_new(:can_delete?, fn -> false end)
-
-    resource = socket.assigns.resource
-
-    api = socket.assigns.api
-    # limit = socket.assigns.limit
-    # offset = socket.assigns.offset
-
-    # TODO issue is here - which of the resource_id should be given if none exists
-    # there should be if condition
-    # inject read options to the api.get!
-
-    # all_read_options = Keyword.put(read_options, :page, limit: limit, offset: offset)
-    read_options = socket.assigns.read_options
-    all_read_options = read_options
-
-    record =
-      socket.assigns.resource_id &&
-        api.get!(resource, socket.assigns.resource_id, all_read_options)
-
-    cols =
-      resource
-      |> Ash.Resource.Info.fields([:attributes])
-      |> Enum.reject(fn attribute ->
-        attribute.name in [:id] || Ash.Type.embedded_type?(attribute.type)
-      end)
-      |> Enum.map(fn attribute ->
-        %{
-          name: attribute.name,
-          title: attribute.name |> to_string() |> String.upcase() |> String.replace("_", " "),
-          width: default_width(attribute.type),
-          sort: if(attribute.name == :inserted_at, do: :asc),
-          read_only: attribute.name in [:id, :inserted_at, :updated_at]
-        }
-      end)
-
-    sort =
-      cols
-      |> Enum.find(fn col -> col[:sort] end)
-      |> case do
-        nil -> []
-        %{name: name, sort: sort_order} -> {name, sort_order}
-      end
-
-    records =
-      resource
-      |> Ash.Query.sort(sort)
-      |> api.read!(all_read_options)
-
-    {:ok,
-     assign(
-       socket,
-       Map.merge(assigns, %{
-         resource: resource,
-         api: api,
-         records: records,
-         cols: cols,
-         record: record,
-         editing_cell: %{
-           field: nil,
-           row_id: nil
-         }
-       })
-     )}
+    socket
+    |> assign(apply_defaults(assigns))
+    |> assign(:query, assigns.query)
+    |> fetch_data()
+    |> then(&{:ok, &1})
   end
 
-  def handle_event("show_add_modal", _params, socket) do
-    {:noreply, assign(socket, show_add_modal: true)}
+  defp apply_defaults(assigns) do
+    @default_assigns |> Map.merge(Map.take(assigns, @assigns))
   end
 
-  def handle_event("sort", %{"index" => index} = _params, socket) do
-    index = String.to_integer(index)
+  defp fetch_data(
+         %{
+           assigns: %{
+             query: query,
+             sort: sort,
+             col: columns,
+             limit: limit,
+             offset: offset,
+             read_options: read_options
+           }
+         } = socket
+       ) do
+    results =
+      query
+      |> apply_sort(sort, columns)
+      |> Ash.read!(Keyword.merge(read_options, page: [limit: limit, offset: offset]))
+      |> dbg()
 
-    # Update the order of the columns in assigns
-    cols = socket.assigns.cols
-    read_options = socket.assigns.read_options
+    columns |> dbg()
 
-    cols =
-      cols
-      |> Enum.with_index()
-      |> Enum.map(fn {col, i} ->
-        if i == index do
-          sort_order =
-            case col[:sort] do
-              nil -> :asc
-              :asc -> :desc
-              :desc -> nil
-            end
-
-          Map.put(col, :sort, sort_order)
-        else
-          Map.put(col, :sort, nil)
-        end
-      end)
-
-    sort =
-      cols
-      |> Enum.find(fn col -> col[:sort] end)
-      |> case do
-        nil -> []
-        %{name: name, sort: sort_order} -> {name, sort_order}
-      end
-
-    all_read_options = read_options
-
-    records =
-      socket.assigns.resource
-      |> Ash.Query.sort(sort)
-      |> socket.assigns.api.read!(all_read_options)
-
-    {:noreply, assign(socket, cols: cols, records: records)}
+    assign(socket, :results, results)
   end
 
-  def handle_event("reposition", %{"index" => index, "new" => new_index} = _params, socket) do
-    # Somehow Sortable passes index as a string, as opposed to new_index
-    index = String.to_integer(index)
+  defp rows_from(%Ash.Page.Offset{results: results}), do: results
 
-    # Update the order of the columns in assigns
-    cols = socket.assigns.cols
+  defp apply_sort(query, {sort_key, direction}, columns) do
+    dbg()
+    col = columns |> Enum.find(&(&1[:sort_key] == sort_key))
 
-    cols =
-      cols
-      |> Enum.with_index()
-      |> Enum.reject(fn {_, i} -> i == index end)
-      |> Enum.map(fn {col, _i} -> col end)
-      |> List.insert_at(new_index, Enum.at(cols, index))
-
-    {:noreply, assign(socket, cols: cols)}
+    case col do
+      %{apply_sort: apply_sort} when is_function(apply_sort) -> apply_sort.(query, direction)
+      _ -> Ash.Query.sort(query, {String.to_existing_atom(sort_key), direction})
+    end
   end
 
-  def handle_event("resize", %{"width" => width, "index" => index} = _params, socket) do
-    # Update the width of the column in assigns
-    cols = socket.assigns.cols
+  @impl true
+  def handle_event(
+        "sort",
+        %{"column" => column, "direction" => direction} = _params,
+        socket
+      ) do
+    direction = String.to_existing_atom(direction)
+    sort = {column, direction}
 
-    cols =
-      cols
-      |> Enum.with_index()
-      |> Enum.map(fn {col, i} ->
-        if i == index do
-          %{col | width: width}
-        else
-          col
-        end
-      end)
-
-    {:noreply, assign(socket, cols: cols)}
+    socket
+    |> assign(sort: sort)
+    |> fetch_data()
+    |> then(&{:noreply, &1})
   end
 
-  def handle_event("delete", _params, socket) do
-    ids =
-      Enum.map(socket.assigns.selected_rows, fn {id, _} -> id end)
-
-    read_options = socket.assigns.read_options
-
-    all_options = Keyword.put(read_options, :domain, socket.assigns.api)
-
-    socket.assigns.resource
-    |> Ash.Query.filter(id in ^ids)
-    |> socket.assigns.api.read!(all_options)
-    |> Enum.each(fn record -> Ash.destroy!(record, all_options) end)
-
-    # Update the width of the column in assigns
-    {:noreply, assign(socket, selected_rows: [], can_edit?: false, can_delete?: false)}
+  def handle_event("set_page", %{"offset" => offset}, socket) do
+    socket
+    |> assign(offset: String.to_integer(offset))
+    |> fetch_data()
+    |> then(&{:noreply, &1})
   end
 
-  defp sort_icon(assigns) do
-    ~H"""
-    <span :if={@col[:sort]} class="ml-2 flex-none rounded text-gray-900 group-hover:bg-gray-200">
-      <icon :if={@col[:sort] == :asc} name="hero-arrow-up" class="h-3" />
-      <icon :if={@col[:sort] == :desc} name="hero-arrow-down" class="h-3" />
-    </span>
-    """
+  def sort_class(column_key, {sort_key, direction}) do
+    if String.to_existing_atom(column_key) == sort_key do
+      Atom.to_string(direction)
+    else
+      "none"
+    end
   end
 
-  defp default_width(Ash.Type.Integer), do: 100
-  defp default_width(Ash.Type.Date), do: 150
-  defp default_width(_), do: 300
+  def sort_direction(column_key, sort) when is_binary(column_key) do
+    column_key
+    |> String.to_existing_atom()
+    |> sort_direction(sort)
+  end
+
+  def sort_direction(column_key, {column_key, direction}), do: toggle_direction(direction)
+  def sort_direction(_, _), do: :asc
+
+  def toggle_direction(:asc), do: :desc
+  def toggle_direction(:desc), do: :asc
+
+  def sort_normalized_keys(keys) do
+    fn obj ->
+      keys |> Enum.map(&(obj[&1] || "")) |> Enum.map(&String.downcase/1) |> List.to_tuple()
+    end
+  end
+
+  def noreply(term) do
+    {:noreply, term}
+  end
+
+  def ok(term) do
+    {:ok, term}
+  end
 end

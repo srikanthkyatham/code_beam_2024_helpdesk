@@ -58,7 +58,7 @@ config :helpdesk, HelpdeskWeb.Endpoint,
     patterns: [
       ~r"priv/static/(?!uploads/).*(js|css|png|jpeg|jpg|gif|svg)$",
       ~r"priv/gettext/.*(po)$",
-      ~r"lib/helpdesk_web/(controllers|live|components)/.*(ex|heex)$"
+      ~r"lib/helpdesk_web/(controllers|live|components|ash)/.*(ex|heex)$"
     ]
   ]
 

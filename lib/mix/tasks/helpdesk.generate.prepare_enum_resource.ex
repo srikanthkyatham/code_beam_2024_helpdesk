@@ -55,7 +55,7 @@ defmodule Mix.Tasks.Helpdesk.Generate.PrepareEnumResources do
   end
 
   defp get_attributes_enum(resource, acc) do
-    attributes = Ash.Resource.Info.attributes(resource)
+    attributes = resource_attributes(resource)
     # remove all builtin attributes
     Enum.reduce(attributes, acc, fn attribute, acc ->
       enum_resource?(attribute, acc)

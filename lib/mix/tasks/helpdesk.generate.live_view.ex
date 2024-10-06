@@ -26,14 +26,14 @@ defmodule Mix.Tasks.Helpdesk.Generate.LiveView do
 
     contents = get_routes(igniter, modules)
 
-    options = [router: router]
+    options = [router: router, with_pipelines: [:browser]]
     route = "/app/org"
+
     Igniter.Libs.Phoenix.append_to_scope(igniter, route, contents, options)
   end
 
   defp get_routes(igniter, modules) do
     contents = """
-
     """
 
     web_module = web_module(igniter)

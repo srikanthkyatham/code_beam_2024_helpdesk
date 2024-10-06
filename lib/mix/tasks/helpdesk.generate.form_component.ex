@@ -18,6 +18,12 @@ defmodule Mix.Tasks.Helpdesk.Generate.FormComponent do
     if exists do
       path = Igniter.Project.Module.proper_location(igniter, form_component_ext)
 
+      # accumulate all fields which are not builtin for every module and type embedded? - handle them differently
+      # accumulated all enum field and add render
+      # value={Helpdesk.Support.Ticket.Types.Status.to_methods(@form[@attribute.name])}
+      #
+      # add module related render to form_ext
+
       igniter =
         Enum.reduce(modules, igniter, fn module, igniter ->
           Igniter.update_elixir_file(igniter, path, fn zipper ->
@@ -214,25 +220,12 @@ defmodule Mix.Tasks.Helpdesk.Generate.FormComponent do
     """)
   end
 
-  defp form_component_ext_name(igniter) do
-    webmodule = web_module(igniter)
-    (webmodule <> ".Ash.FormComponentExt") |> string_to_module_name()
-  end
-
-  defp form_component_name(igniter) do
-    web_module = web_module(igniter)
-    Igniter.Code.Module.parse("#{web_module}.Ash.FormComponent")
-  end
-
   # issues with compilation
   defp add_core_form_component(igniter) do
     web_module = web_module(igniter)
 
     module_name =
       form_component_name(igniter)
-
-    base_module_name = get_module_base_name(module_name)
-    plural_module_name = base_module_name <> "s"
 
     code = """
     use Phoenix.LiveComponent
@@ -245,6 +238,30 @@ defmodule Mix.Tasks.Helpdesk.Generate.FormComponent do
     import #{web_module}.CoreComponents
 
     alias Ash.Resource.Info
+
+    @moduledoc \"""
+      Generic sortable table component
+
+      Expects the following parameters as assigns:
+
+      * `id` - necessary, as this is a stateful LiveView component
+      * `resource` - An Ash Query or Resource module
+      * `path` path to return on modal cancel
+      * `url` whole url
+
+    \"""
+
+
+    @assigns [
+    :id,
+    :name,
+    :resource,
+    :live_action,
+    :record,
+    :api,
+    :path,
+    ]
+
 
 
     def update(assigns, socket) do
@@ -291,6 +308,9 @@ defmodule Mix.Tasks.Helpdesk.Generate.FormComponent do
 
     def handle_event("save", _, socket) do
     form = socket.assigns.form
+    path = socket.assigns.path
+
+    parent_path = "/app/org/" <> path
 
     case AshPhoenix.Form.submit(form,
            params: form.source.params,
@@ -300,13 +320,13 @@ defmodule Mix.Tasks.Helpdesk.Generate.FormComponent do
         {:noreply,
          socket
          |> put_flash(:info, "Flash")
-         |> push_patch(to: "/ash/#{plural_module_name}")}
+         |> push_patch(to: parent_path)}
 
       :ok ->
         {:noreply,
          socket
          |> put_flash(:info, "Flash")
-         |> push_patch(to: "/ash/#{plural_module_name}")}
+         |> push_patch(to: parent_path)}
 
       {:error, form} ->
         {:noreply, assign(socket, :form, form)}
@@ -314,14 +334,14 @@ defmodule Mix.Tasks.Helpdesk.Generate.FormComponent do
     end
 
       def attribute_name(attribute) do
-        attribute.name
+        Atom.to_string(attribute.name)
       end
       def form_name(name, attribute) do
-        name <> attribute.name
+        name <> Atom.to_string(attribute.name)
       end
 
       def form_id(id, attribute) do
-        id <> attribute.name
+        id <> Atom.to_string(attribute.name)
       end
       def render_attributes(assigns, _resource, _action, _form) do
       ~H\"""
@@ -433,9 +453,11 @@ defmodule Mix.Tasks.Helpdesk.Generate.FormComponent do
       Enum.reduce(fields, [], fn attribute, acc ->
         # even enum types
         # check whether the module has the needs_prepare_params
-        if (Ash.Type.embedded_type?(attribute.type) and attribute.needs_prepare_params) ||
-             Keyword.has_key?(attribute.__info__(:functions), :needs_prepare_params) do
-          Enum.concat(acc, [attribute.prepare_params])
+        if is_atom(attribute.type) and
+             ((Ash.Type.embedded_type?(attribute.type) and
+                 function_exported?(attribute.type, :prepare_params, 2)) ||
+                function_exported?(attribute.type, :prepare_params, 2)) do
+            Enum.concat(acc, [attribute.prepare_params])
         else
           acc
         end
@@ -467,3 +489,7 @@ defmodule Mix.Tasks.Helpdesk.Generate.FormComponent do
     end
   end
 end
+
+# generate all the form attributes
+# not built in types should have their own render
+# nested form, if it has its own fields

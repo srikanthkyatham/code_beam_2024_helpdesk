@@ -19,37 +19,98 @@ defmodule Mix.Tasks.Helpdesk.Generate.LiveView.Index do
     # module plural name
     module_plural_name = get_plural_module_name(module)
     id = "#{module_plural_name}_id"
-    resource_live_path = module_plural_name
+    path = module_plural_name
 
-    code =
+    code_start =
       """
         <div>
           <.live_component
             id="#{id}"
+            module={#{ash_table_component}}
             limit={10}
             offset={0}
             sort={{"id", :asc}}
+            query={#{module}}
             read_options={[{:tenant, @current_tenant}]}
-            module={#{ash_table_component}}
-            resource={#{module}}
-            resource_live_path={"#{resource_live_path}"}
+            path={"#{path}"}
             query={#{module}}
             api={#{domain}}
             resource_id={@resource_id}
             live_action={@live_action}
             tenant={@current_tenant}
             url={@url}
-          />
-      </div>
+          >
+
       """
 
+    attributes = resource_attributes(module)
+
+    code_middle = """
+    """
+
+    code_middle =
+      Enum.reduce(attributes, code_middle, fn attribute, acc ->
+        # generate
+        name = attribute.name |> Atom.to_string()
+        label = name |> String.capitalize()
+
+        """
+        <:col :let={record} label="#{label}"><%= record.#{name} %></:col>
+        """
+
+        col_row = ""
+        acc <> col_row
+      end)
+
+    # button
+    # modal
+
+    form_component_name = form_component_name(igniter)
+
+    code_end = """
+              </.live_component>
+
+      <div class="flex px-3 py-2 bg-gray-100 gap-2">
+        <.button
+          phx-click={JS.patch("/app/org/tickets/new")}
+          type="button"
+          class="rounded bg-white px-3 py-1 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+        >
+          <.icon name="hero-plus" class="h-4 -mt-1" />Create
+        </.button>
+
+      </div>
+
+      <.modal
+        :if={@live_action in [:new, :edit]}
+        id="modal"
+        show
+        on_cancel={JS.patch("#{@path}")}
+      >
+        <.live_component
+          module={#{form_component_name}}
+          resource={#{module}}
+          live_action={@live_action}
+          record={@record}
+          api={#{domain}}
+          id="form"
+          name="book"
+        />
+      </.modal>
+
+
+       </div>
+
+    """
+
+    new_code = code_start <> code_middle <> code_end
+
     path = get_module_heex_file_path(igniter, module, "index.html.heex")
-    Igniter.create_new_file(igniter, path, code)
+    Igniter.create_new_file(igniter, path, new_code)
   end
 
   def add_index_ex(igniter, domain, module) do
     web_module = web_module(igniter)
-    module_plural_name = get_plural_module_name(module)
     # api -> domain
     # api.get
     # api.read
@@ -63,6 +124,8 @@ defmodule Mix.Tasks.Helpdesk.Generate.LiveView.Index do
 
     # how to get the org
     # current tenant ??
+
+    module_plural_name = get_plural_module_name(module)
 
     code =
       """
@@ -88,7 +151,9 @@ defmodule Mix.Tasks.Helpdesk.Generate.LiveView.Index do
         |> assign(:current_tenant, current_tenant)
         |> assign(:domain, #{domain})
         |> assign(:resource, #{module})
-        |> assign(:read_options, read_options)}
+        |> assign(:read_options, read_options)
+        |> assign(:path, #{module_plural_name})
+        }
       end
 
       @impl true

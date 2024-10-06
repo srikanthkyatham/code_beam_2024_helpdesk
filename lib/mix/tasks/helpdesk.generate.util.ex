@@ -15,9 +15,7 @@ defmodule Mix.Tasks.Helpdesk.Generate.Util do
   end
 
   def table_component_name(igniter) do
-    webmodule = web_module(igniter)
-
-    (webmodule <> ".Ash.Table") |> string_to_module_name()
+    "AshTable.Table" |> string_to_module_name()
   end
 
   def string_to_module_name(module_name) do
@@ -52,5 +50,19 @@ defmodule Mix.Tasks.Helpdesk.Generate.Util do
     split_module_name(module_name)
     |> Enum.map(fn str -> String.downcase(str) end)
     |> Enum.join("_")
+  end
+
+  def resource_attributes(resource) do
+    Ash.Resource.Info.attributes(resource)
+  end
+
+  def form_component_ext_name(igniter) do
+    webmodule = web_module(igniter)
+    (webmodule <> ".Ash.FormComponentExt") |> string_to_module_name()
+  end
+
+  def form_component_name(igniter) do
+    web_module = web_module(igniter)
+    Igniter.Code.Module.parse("#{web_module}.Ash.FormComponent")
   end
 end
