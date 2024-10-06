@@ -14,7 +14,7 @@ defmodule Mix.Tasks.Helpdesk.Generate.LiveView.Index do
     # add modules with the code for the respective
     # more deduction
     # create index, show, form
-    ash_table_component = table_component_name(igniter)
+    ash_table_component = table_component_name()
 
     # module plural name
     module_plural_name = get_plural_module_name(module)

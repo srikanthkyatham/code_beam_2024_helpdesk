@@ -1,5 +1,5 @@
 defmodule AshTable.Table do
-  use Phoenix.LiveComponent
+  use HelpdeskWeb, :live_component
 
   alias AshTable.TableHelpers
 
@@ -80,9 +80,6 @@ defmodule AshTable.Table do
       query
       |> apply_sort(sort, columns)
       |> Ash.read!(Keyword.merge(read_options, page: [limit: limit, offset: offset]))
-      |> dbg()
-
-    columns |> dbg()
 
     assign(socket, :results, results)
   end
@@ -90,7 +87,6 @@ defmodule AshTable.Table do
   defp rows_from(%Ash.Page.Offset{results: results}), do: results
 
   defp apply_sort(query, {sort_key, direction}, columns) do
-    dbg()
     col = columns |> Enum.find(&(&1[:sort_key] == sort_key))
 
     case col do

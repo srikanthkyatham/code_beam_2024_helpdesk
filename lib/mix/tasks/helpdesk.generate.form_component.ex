@@ -20,9 +20,18 @@ defmodule Mix.Tasks.Helpdesk.Generate.FormComponent do
 
       # accumulate all fields which are not builtin for every module and type embedded? - handle them differently
       # accumulated all enum field and add render
+
       # value={Helpdesk.Support.Ticket.Types.Status.to_methods(@form[@attribute.name])}
       #
       # add module related render to form_ext
+      all_enum_resources = all_enum_resources(modules)
+
+      igniter =
+        Enum.reduce(all_enum_resources, igniter, fn enum_resource, igniter ->
+          Igniter.update_elixir_file(igniter, path, fn zipper ->
+            for_every_enum_module(zipper, enum_resource)
+          end)
+        end)
 
       igniter =
         Enum.reduce(modules, igniter, fn module, igniter ->
@@ -40,6 +49,35 @@ defmodule Mix.Tasks.Helpdesk.Generate.FormComponent do
       |> add_form_component_ext()
       |> add_form_components(modules)
     end
+  end
+
+  def for_every_enum_module(zipper, enum_resource) do
+    module_name = enum_resource |> Atom.to_string()
+    base_module_name = get_module_base_name(enum_resource) |> String.capitalize()
+
+    new_code = """
+    def render_attribute_input(
+        assigns,
+        %{type: #{module_name}} = attribute,
+        form,
+        value,
+        name
+      ) do
+      assigns = assign(assigns, form: form, value: value, name: name, attribute: attribute)
+
+      ~H\"""
+        <.input
+          type="select"
+          label="#{base_module_name}"
+          name="#{base_module_name}"
+          options={#{module_name}.options()}
+          value={#{module_name}.to_methods(@form[@attribute.name])}
+        />
+      \"""
+    end
+    """
+
+    add_code_to_zipper(zipper, new_code)
   end
 
   defp add_render_for_array_of_builts(igniter, zipper) do
@@ -489,7 +527,3 @@ defmodule Mix.Tasks.Helpdesk.Generate.FormComponent do
     end
   end
 end
-
-# generate all the form attributes
-# not built in types should have their own render
-# nested form, if it has its own fields
