@@ -50,7 +50,6 @@ defmodule Mix.Tasks.Helpdesk.Generate.LiveView.Index do
     code_middle = """
     """
 
-    # TODO: This is not working
     code_middle =
       Enum.reduce(attributes, code_middle, fn attribute, acc ->
         # generate
@@ -95,8 +94,8 @@ defmodule Mix.Tasks.Helpdesk.Generate.LiveView.Index do
           live_action={@live_action}
           record={@record}
           api={#{domain}}
-          id="form"
-          name="book"
+          id="#{id}"
+          name="#{module_plural_name}_form"
         />
       </.modal>
 

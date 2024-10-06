@@ -495,7 +495,7 @@ defmodule Mix.Tasks.Helpdesk.Generate.FormComponent do
              ((Ash.Type.embedded_type?(attribute.type) and
                  function_exported?(attribute.type, :prepare_params, 2)) ||
                 function_exported?(attribute.type, :prepare_params, 2)) do
-            Enum.concat(acc, [attribute.prepare_params])
+            Enum.concat(acc, [&attribute.type.prepare_params/2])
         else
           acc
         end
