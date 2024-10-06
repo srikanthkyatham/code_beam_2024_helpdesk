@@ -152,7 +152,7 @@ defmodule Mix.Tasks.Helpdesk.Generate.LiveView.Index do
         |> assign(:domain, #{domain})
         |> assign(:resource, #{module})
         |> assign(:read_options, read_options)
-        |> assign(:path, #{module_plural_name})
+        |> assign(:path, "#{module_plural_name}")
         }
       end
 
