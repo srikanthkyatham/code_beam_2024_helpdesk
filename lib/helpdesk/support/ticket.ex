@@ -1,9 +1,19 @@
 defmodule Helpdesk.Support.Ticket do
   use Ash.Resource,
     otp_app: :helpdesk,
-    domain: Helpdesk.Support
+    domain: Helpdesk.Support,
+    data_layer: AshPostgres.DataLayer
 
   alias Helpdesk.Support.Ticket.Types.Attachment
+
+  postgres do
+    table "tickets"
+    repo Helpdesk.Repo
+
+    # manage_tenant do
+    #  template(["org_", :id])
+    # end
+  end
 
   actions do
     defaults [:read]

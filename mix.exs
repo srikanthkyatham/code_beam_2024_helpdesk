@@ -86,7 +86,13 @@ defmodule Helpdesk.MixProject do
         "esbuild helpdesk --minify",
         "phx.digest"
       ],
-      "ash.setup": ["ash.setup", "run priv/repo/seeds.exs"]
+      "ash.setup": ["ash.setup", "run priv/repo/seeds.exs"],
+      "ash.reset": [
+        "ash_postgres.drop",
+        "ecto.create",
+        "ash_postgres.generate_migrations",
+        "ash_postgres.migrate"
+      ]
     ]
   end
 end
