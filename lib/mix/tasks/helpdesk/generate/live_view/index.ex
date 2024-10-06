@@ -132,6 +132,7 @@ defmodule Mix.Tasks.Helpdesk.Generate.LiveView.Index do
       defp current_index_path(index_params, current_tenant) do
         index_params = index_params || %{}
         # EEx.eval_string("/app/org/<%= @current_tenant %>/#{module_plural_name}?<%= @index_params %>", assigns: [current_tenant: current_tenant, index_params: index_params])
+        # TODO a better way to do it
         EEx.eval_string("/app/org/#{module_plural_name}?<%= @index_params %>", assigns: [index_params: index_params])
       end
 
