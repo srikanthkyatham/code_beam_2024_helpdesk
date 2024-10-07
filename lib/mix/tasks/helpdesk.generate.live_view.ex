@@ -59,8 +59,11 @@ defmodule Mix.Tasks.Helpdesk.Generate.LiveView do
       base_route = scope_path <> "/" <> module_name_to_string_with_underscores(module) <> "s"
       base_module_name = get_module_base_name(module)
       base = Igniter.Code.Module.parse("Live.#{base_module_name}Live")
-      index_module = Igniter.Code.Module.parse("#{base}.Index")
-      show_module = Igniter.Code.Module.parse("#{base}.Show")
+
+      index_module =
+        Igniter.Code.Module.parse("#{base}.Index") |> Module.split() |> Enum.join(".")
+
+      show_module = Igniter.Code.Module.parse("#{base}.Show") |> Module.split() |> Enum.join(".")
 
       # live("/business_units", BusinessUnitLive.Index, :index)
       # live("/business_units/new", BusinessUnitLive.Index, :new)
