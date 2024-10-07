@@ -92,7 +92,8 @@ defmodule Helpdesk.MixProject do
         "ecto.create",
         "ash_postgres.generate_migrations",
         "ash_postgres.migrate"
-      ]
+      ],
+      "ash.gen.remove": ["cmd ./scripts/remove_ash_gen_files.sh"]
     ]
   end
 end
