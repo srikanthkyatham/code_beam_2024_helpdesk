@@ -78,6 +78,10 @@ defmodule Mix.Tasks.Helpdesk.Generate.Util do
     Enum.concat(enum_resources, attribute_enum_resources) |> Enum.uniq()
   end
 
+  def scope_path() do
+    "/auth"
+  end
+
   defp get_attributes_enum(resource, acc) do
     attributes = resource_attributes(resource)
     # remove all builtin attributes

@@ -23,13 +23,29 @@ defmodule Mix.Tasks.Helpdesk.Generate.LiveView do
   defp add_live_views_to_router(igniter, modules) do
     {igniter, routers} = Igniter.Libs.Phoenix.list_routers(igniter)
     router = List.first(routers)
+    web_module = web_module(igniter)
 
-    contents = get_routes(igniter, modules)
+    before_code = """
+    # add following to the router.ex
+    scope "/", #{web_module} do
+      pipe_through([:browser])
+
+      ash_authentication_live_session :authentication_required,
+        on_mount: {#{web_module}.LiveUserAuth, :live_user_required} do
+
+    """
+
+    code = get_routes(igniter, modules)
+    after_code = "end"
+
+    all_code = before_code <> code <> after_code
 
     options = [router: router, with_pipelines: [:browser]]
     route = "/app/org"
 
-    Igniter.Libs.Phoenix.append_to_scope(igniter, route, contents, options)
+    # Igniter.Libs.Phoenix.append_to_scope(igniter, route, all_code, options)
+
+    Igniter.add_notice(igniter, all_code)
   end
 
   defp get_routes(igniter, modules) do
@@ -39,7 +55,8 @@ defmodule Mix.Tasks.Helpdesk.Generate.LiveView do
     web_module = web_module(igniter)
 
     Enum.reduce(modules, contents, fn module, acc ->
-      base_route = module_name_to_string_with_underscores(module) <> "s"
+      scope_path = scope_path()
+      base_route = scope_path <> "/" <> module_name_to_string_with_underscores(module) <> "s"
       base_module_name = get_module_base_name(module)
       base = Igniter.Code.Module.parse("#{web_module}.Live.#{base_module_name}Live")
       index_module = Igniter.Code.Module.parse("#{base}.Index")

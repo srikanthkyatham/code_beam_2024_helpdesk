@@ -68,12 +68,14 @@ defmodule Mix.Tasks.Helpdesk.Generate.LiveView.Index do
 
     form_component_name = form_component_name(igniter)
 
+    base_path = scope_path() <> "/" <> module_plural_name
+
     code_end = """
     </.live_component>
 
     <div class="flex px-3 py-2 bg-gray-100 gap-2">
       <.button
-        phx-click={JS.patch("/app/org/#{module_plural_name}/new")}
+        phx-click={JS.patch("#{base_path}/new")}
         type="button"
         class="rounded bg-white px-3 py-1 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
       >
