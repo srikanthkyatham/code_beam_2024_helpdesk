@@ -327,6 +327,7 @@ defmodule Mix.Tasks.Helpdesk.Generate.FormComponent do
       form_component_name(igniter)
 
     form_component_ext = form_component_ext_name(igniter)
+    scope_path = scope_path()
 
     code = """
     use Phoenix.LiveComponent
@@ -411,7 +412,7 @@ defmodule Mix.Tasks.Helpdesk.Generate.FormComponent do
     form = socket.assigns.form
     path = socket.assigns.path
 
-    parent_path = "/app/org/" <> path
+    parent_path = #{scope_path} <> path
 
     case AshPhoenix.Form.submit(form,
            params: form.source.params,

@@ -58,7 +58,7 @@ defmodule Mix.Tasks.Helpdesk.Generate.LiveView do
       scope_path = scope_path()
       base_route = scope_path <> "/" <> module_name_to_string_with_underscores(module) <> "s"
       base_module_name = get_module_base_name(module)
-      base = Igniter.Code.Module.parse("#{web_module}.Live.#{base_module_name}Live")
+      base = Igniter.Code.Module.parse("Live.#{base_module_name}Live")
       index_module = Igniter.Code.Module.parse("#{base}.Index")
       show_module = Igniter.Code.Module.parse("#{base}.Show")
 
