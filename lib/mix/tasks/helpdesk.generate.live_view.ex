@@ -71,12 +71,12 @@ defmodule Mix.Tasks.Helpdesk.Generate.LiveView do
 
       routes =
         """
-        live("/#{base_route}", #{index_module}, :index)
-        live("/#{base_route}/new", #{index_module}, :new)
-        live("/#{base_route}/:id/edit", #{index_module}, :edit)
+        live("#{base_route}", #{index_module}, :index)
+        live("#{base_route}/new", #{index_module}, :new)
+        live("#{base_route}/:id/edit", #{index_module}, :edit)
 
-        live("/#{base_route}/:id", #{show_module}, :show)
-        live("/#{base_route}/:id/show/edit", #{show_module}, :edit)
+        live("#{base_route}/:id", #{show_module}, :show)
+        live("#{base_route}/:id/show/edit", #{show_module}, :edit)
 
         """
 
