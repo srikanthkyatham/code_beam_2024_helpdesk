@@ -18,12 +18,6 @@ defmodule Mix.Tasks.Helpdesk.Generate.FormComponent do
     if exists do
       path = Igniter.Project.Module.proper_location(igniter, form_component_ext)
 
-      # accumulate all fields which are not builtin for every module and type embedded? - handle them differently
-      # accumulated all enum field and add render
-
-      # value={Helpdesk.Support.Ticket.Types.Status.to_methods(@form[@attribute.name])}
-      #
-      # add module related render to form_ext
       all_enum_resources = all_enum_resources(modules)
 
       igniter =
@@ -242,7 +236,12 @@ defmodule Mix.Tasks.Helpdesk.Generate.FormComponent do
   defp add_generic_form_component(zipper) do
     new_code = """
     def render_attribute_input(assigns, attribute, form, _value, _name) do
-      assigns = assign(assigns, attribute: attribute, form: form)
+      assigns =
+        assign(assigns,
+        attribute: attribute,
+        form: form,
+        label: attribute_name(attribute) |> String.capitalize()
+      )
 
       ~H\"""
         <.input
@@ -254,6 +253,9 @@ defmodule Mix.Tasks.Helpdesk.Generate.FormComponent do
       \"""
     end
 
+    def attribute_name(attribute) do
+      Atom.to_string(attribute.name)
+    end
     """
 
     add_code_to_zipper(zipper, new_code)
@@ -547,34 +549,34 @@ defmodule Mix.Tasks.Helpdesk.Generate.FormComponent do
     def to_name(:id), do: "ID"
 
     def to_name(name) do
-    name
-    |> to_string()
-    |> String.split("_")
-    |> Enum.map_join(" ", &String.capitalize/1)
+      name
+      |> to_string()
+      |> String.split("_")
+      |> Enum.map_join(" ", &String.capitalize/1)
     end
 
     def collect_prepare_params(fields) do
-    all_prepare_params =
-      Enum.reduce(fields, [], fn attribute, acc ->
-        # even enum types
-        # check whether the module has the needs_prepare_params
-        if is_atom(attribute.type) and
+      all_prepare_params =
+        Enum.reduce(fields, [], fn attribute, acc ->
+          # even enum types
+          # check whether the module has the needs_prepare_params
+          if is_atom(attribute.type) and
              ((Ash.Type.embedded_type?(attribute.type) and
                  function_exported?(attribute.type, :prepare_params, 2)) ||
                 function_exported?(attribute.type, :prepare_params, 2)) do
             Enum.concat(acc, [&attribute.type.prepare_params/2])
-        else
-          acc
-        end
-      end)
+          else
+            acc
+          end
+        end)
 
-    prepare_params = fn params, extra ->
-      Enum.reduce(all_prepare_params, params, fn prepare_params, acc ->
-        prepare_params.(acc, extra)
-      end)
-    end
+      prepare_params = fn params, extra ->
+        Enum.reduce(all_prepare_params, params, fn prepare_params, acc ->
+          prepare_params.(acc, extra)
+        end)
+      end
 
-    prepare_params
+      prepare_params
     end
 
     """
