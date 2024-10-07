@@ -412,7 +412,7 @@ defmodule Mix.Tasks.Helpdesk.Generate.FormComponent do
     form = socket.assigns.form
     path = socket.assigns.path
 
-    parent_path = #{scope_path} <> path
+    parent_path = "#{scope_path}" <> path
 
     case AshPhoenix.Form.submit(form,
            params: form.source.params,
