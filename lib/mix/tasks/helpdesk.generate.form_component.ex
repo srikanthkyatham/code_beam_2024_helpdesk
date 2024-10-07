@@ -7,10 +7,10 @@ defmodule Mix.Tasks.Helpdesk.Generate.FormComponent do
     |> add_form_helper()
     |> add_core_form_component()
     |> add_form_component_ext()
-    |> add_form_components(modules)
+    |> add_form_components_to_ext(modules)
   end
 
-  defp add_form_components(igniter, modules) do
+  defp add_form_components_to_ext(igniter, modules) do
     form_component_ext = form_component_ext_name(igniter)
     # create file if does not exist
     {exists, igniter} = Igniter.Project.Module.module_exists?(igniter, form_component_ext)
@@ -33,21 +33,25 @@ defmodule Mix.Tasks.Helpdesk.Generate.FormComponent do
           end)
         end)
 
-      igniter =
-        Enum.reduce(modules, igniter, fn module, igniter ->
-          Igniter.update_elixir_file(igniter, path, fn zipper ->
-            for_every_module_add_form(igniter, zipper, module)
-          end)
+      Enum.reduce(modules, igniter, fn module, igniter ->
+        Igniter.update_elixir_file(igniter, path, fn zipper ->
+          for_every_module_add_form(igniter, zipper, module)
         end)
+      end)
 
       # default renders for builts in
-      Igniter.update_elixir_file(igniter, path, fn zipper ->
+      |> Igniter.update_elixir_file(path, fn zipper ->
         add_render_for_array_of_builts(igniter, zipper)
+      end)
+
+      # generic handler
+      |> Igniter.update_elixir_file(path, fn zipper ->
+        add_generic_form_component(zipper)
       end)
     else
       igniter
       |> add_form_component_ext()
-      |> add_form_components(modules)
+      |> add_form_components_to_ext(modules)
     end
   end
 
@@ -195,6 +199,61 @@ defmodule Mix.Tasks.Helpdesk.Generate.FormComponent do
         </div>
       \"""
     end
+
+    def render_attribute_input(
+        assigns,
+        #{module} = attribute,
+        form,
+        value,
+        name
+      ) do
+
+      nested_fields = fields_of_resource(attribute)
+
+      assigns =
+        assign(assigns,
+          form: form,
+          value: value,
+          name: name,
+          attribute: attribute,
+          nested_fields: nested_fields
+        )
+
+      ~H\"""
+        <div>
+          <%= for nested_field <- @nested_fields do %>
+            <%= render_attribute_input(
+              assigns,
+              nested_field,
+              @form,
+              nil,
+              nil
+            ) %>
+          <% end %>
+      </div>
+    \"""
+    end
+
+    """
+
+    add_code_to_zipper(zipper, new_code)
+  end
+
+  defp add_generic_form_component(zipper) do
+    new_code = """
+    def render_attribute_input(assigns, attribute, form, _value, _name) do
+      assigns = assign(assigns, attribute: attribute, form: form)
+
+      ~H\"""
+        <.input
+          type="text"
+          field={@form[@attribute.name]}
+          disabled={false && @attribute.read_only}
+          class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+        />
+      \"""
+    end
+
     """
 
     add_code_to_zipper(zipper, new_code)
@@ -264,6 +323,8 @@ defmodule Mix.Tasks.Helpdesk.Generate.FormComponent do
 
     module_name =
       form_component_name(igniter)
+
+    form_component_ext = form_component_ext_name(igniter)
 
     code = """
     use Phoenix.LiveComponent
@@ -429,20 +490,26 @@ defmodule Mix.Tasks.Helpdesk.Generate.FormComponent do
       ~H\"""
       <div>
         <.header>New <%= Info.short_name(@resource) %></.header>
-        <.form
-          :let={form}
-          as={:action}
+        <.simple_form
           for={@form}
           phx-change="validate"
           phx-submit="save"
           phx-target={@myself}
-          id={"#{@id}_form"}
+          id="form_component"
         >
           <div class="my-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-            <%= render_attributes(assigns, @resource, nil, form) %>
+            <%= #{form_component_ext}.render_attribute_input(
+              assigns,
+              @resource,
+              @form,
+              nil,
+              nil
+            ) %>
           </div>
-          <.button phx-disable-with="Saving...">Save</.button>
-        </.form>
+          <:actions>
+            <.button phx-disable-with="Saving...">Save</.button>
+          </:actions>
+        </.simple_form>
       </div>
       \"""
       end
