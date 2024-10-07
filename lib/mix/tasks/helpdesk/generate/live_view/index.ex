@@ -23,23 +23,23 @@ defmodule Mix.Tasks.Helpdesk.Generate.LiveView.Index do
 
     code_start =
       """
-        <div>
-          <.live_component
-            id="#{id}"
-            module={#{ash_table_component}}
-            limit={10}
-            offset={0}
-            sort={{"id", :asc}}
-            query={#{module}}
-            read_options={[{:tenant, @current_tenant}]}
-            path={"#{path}"}
-            query={#{module}}
-            api={#{domain}}
-            resource_id={@resource_id}
-            live_action={@live_action}
-            tenant={@current_tenant}
-            url={@url}
-          >
+      <div>
+        <.live_component
+          id="#{id}"
+          module={#{ash_table_component}}
+          limit={10}
+          offset={0}
+          sort={{"id", :asc}}
+          query={#{module}}
+          read_options={[{:tenant, @current_tenant}]}
+          path={"#{path}"}
+          query={#{module}}
+          api={#{domain}}
+          resource_id={@resource_id}
+          live_action={@live_action}
+          tenant={@current_tenant}
+          url={@url}
+        >
 
       """
 
@@ -57,7 +57,7 @@ defmodule Mix.Tasks.Helpdesk.Generate.LiveView.Index do
         label = name |> String.capitalize()
 
         col_row = """
-        <:col :let={record} label="#{label}"><%= record.#{name} %></:col>
+           <:col :let={record} label="#{label}"><%= record.#{name} %></:col>
         """
 
         acc <> col_row
@@ -69,40 +69,36 @@ defmodule Mix.Tasks.Helpdesk.Generate.LiveView.Index do
     form_component_name = form_component_name(igniter)
 
     code_end = """
-              </.live_component>
+    </.live_component>
 
-      <div class="flex px-3 py-2 bg-gray-100 gap-2">
-        <.button
-          phx-click={JS.patch("/app/org/#{module_plural_name}/new")}
-          type="button"
-          class="rounded bg-white px-3 py-1 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-        >
-          <.icon name="hero-plus" class="h-4 -mt-1" />Create
-        </.button>
-
-      </div>
-
-      <.modal
-        :if={@live_action in [:new, :edit]}
-        id="modal"
-        show
-        on_cancel={JS.patch("#{@path}")}
+    <div class="flex px-3 py-2 bg-gray-100 gap-2">
+      <.button
+        phx-click={JS.patch("/app/org/#{module_plural_name}/new")}
+        type="button"
+        class="rounded bg-white px-3 py-1 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
       >
-        <.live_component
-          module={#{form_component_name}}
-          resource={#{module}}
-          live_action={@live_action}
-          record={@record}
-          api={#{domain}}
-          id="#{id}"
-          name="#{module_plural_name}_form"
-          path={"#{path}"}
-        />
-      </.modal>
+        <.icon name="hero-plus" class="h-4 -mt-1" />Create
+      </.button>
+    </div>
 
-
-       </div>
-
+    <.modal
+      :if={@live_action in [:new, :edit]}
+      id="modal"
+      show
+      on_cancel={JS.patch("#{@path}")}
+    >
+      <.live_component
+        module={#{form_component_name}}
+        resource={#{module}}
+        live_action={@live_action}
+        record={@record}
+        api={#{domain}}
+        id="#{id}"
+        name="#{module_plural_name}_form"
+        path={"#{path}"}
+      />
+    </.modal>
+    </div>
     """
 
     new_code = code_start <> code_middle <> code_end
