@@ -32,15 +32,14 @@ defmodule Mix.Tasks.Helpdesk.Generate.FormComponent do
           for_every_module_add_form(igniter, zipper, module)
         end)
       end)
+      # generic handler
+      |> Igniter.update_elixir_file(path, fn zipper ->
+        add_generic_form_component(zipper)
+      end)
 
       # default renders for builts in
       |> Igniter.update_elixir_file(path, fn zipper ->
         add_render_for_array_of_builts(igniter, zipper)
-      end)
-
-      # generic handler
-      |> Igniter.update_elixir_file(path, fn zipper ->
-        add_generic_form_component(zipper)
       end)
     else
       igniter

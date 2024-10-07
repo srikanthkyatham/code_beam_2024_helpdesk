@@ -128,7 +128,6 @@ defmodule Mix.Tasks.Helpdesk.Generate.LiveView.Index do
     code =
       """
       use #{web_module}, :live_view
-      alias #{module}
 
       @limit 10
       @offset 10
@@ -137,7 +136,7 @@ defmodule Mix.Tasks.Helpdesk.Generate.LiveView.Index do
       require Logger
 
       @impl true
-      def mount(params, _session, socket) do
+      def mount(_params, _session, socket) do
         #org_slug = params["org_slug"]
         current_tenant = nil
         read_options = Keyword.put([], :page, limit: @limit, offset: @offset)
