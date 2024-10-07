@@ -188,7 +188,6 @@ defmodule Mix.Tasks.Helpdesk.Generate.LiveView.Index do
       defp apply_action(socket, :index, params) do
         socket
         |> assign(:page_title, "Listing #{title}s")
-        |> assign_#{module_plural_name}(params)
         |> assign(index_params: params)
       end
 
@@ -197,17 +196,6 @@ defmodule Mix.Tasks.Helpdesk.Generate.LiveView.Index do
         # EEx.eval_string("/app/org/<%= @current_tenant %>/#{module_plural_name}?<%= @index_params %>", assigns: [current_tenant: current_tenant, index_params: index_params])
         # TODO a better way to do it
         EEx.eval_string("/app/org/#{module_plural_name}?<%= @index_params %>", assigns: [index_params: index_params])
-      end
-
-      defp assign_#{module_plural_name}(socket, params) do
-        resource = socket.assigns.resource
-        read_options = socket.assigns.read_options
-        domain = socket.assigns.domain
-
-        records = resource
-                  |> domain.read!(read_options)
-
-        assign(socket, records: records)
       end
       """
 
