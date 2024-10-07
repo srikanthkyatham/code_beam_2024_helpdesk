@@ -6,17 +6,23 @@ defmodule Helpdesk.Accounts.User do
     extensions: [AshAuthentication],
     data_layer: AshPostgres.DataLayer
 
-  postgres do
-    table "users"
-    repo Helpdesk.Repo
-  end
-
   authentication do
     tokens do
       enabled? true
       token_resource Helpdesk.Accounts.Token
       signing_secret Helpdesk.Secrets
     end
+
+    strategies do
+      password :password do
+        identity_field :email
+      end
+    end
+  end
+
+  postgres do
+    table "users"
+    repo Helpdesk.Repo
   end
 
   actions do
@@ -40,5 +46,11 @@ defmodule Helpdesk.Accounts.User do
 
   attributes do
     uuid_primary_key :id
+    attribute :email, :ci_string, allow_nil?: false, public?: true
+    attribute :hashed_password, :string, allow_nil?: false, sensitive?: true
+  end
+
+  identities do
+    identity :unique_email, [:email]
   end
 end
