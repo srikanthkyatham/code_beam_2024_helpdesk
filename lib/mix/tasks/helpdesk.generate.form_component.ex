@@ -246,6 +246,7 @@ defmodule Mix.Tasks.Helpdesk.Generate.FormComponent do
         <.input
           type="text"
           field={@form[@attribute.name]}
+          label={@label}
           disabled={false && @attribute.read_only}
           class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
         />
