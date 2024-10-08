@@ -41,7 +41,6 @@ defmodule Mix.Tasks.Helpdesk.Generate.LiveView do
     all_code = before_code <> code <> after_code
 
     options = [router: router, with_pipelines: [:browser]]
-    route = "/app/org"
 
     # Igniter.Libs.Phoenix.append_to_scope(igniter, route, all_code, options)
 
@@ -56,7 +55,10 @@ defmodule Mix.Tasks.Helpdesk.Generate.LiveView do
 
     Enum.reduce(modules, contents, fn module, acc ->
       scope_path = scope_path()
-      base_route = scope_path <> "/" <> module_name_to_string_with_underscores(module) <> "s"
+
+      base_route =
+        scope_path <> "/:org_slug/" <> module_name_to_string_with_underscores(module) <> "s"
+
       base_module_name = get_module_base_name(module)
       base = Igniter.Code.Module.parse("Live.#{base_module_name}Live")
 

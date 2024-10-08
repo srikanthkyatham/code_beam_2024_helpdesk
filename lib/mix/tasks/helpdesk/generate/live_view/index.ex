@@ -68,7 +68,7 @@ defmodule Mix.Tasks.Helpdesk.Generate.LiveView.Index do
 
     form_component_name = form_component_name(igniter)
 
-    base_path = scope_path() <> "/" <> module_plural_name
+    base_path = scope_path() <> "/#{@org_slug}/" <> module_plural_name
 
     code_end = """
     </.live_component>
@@ -98,6 +98,7 @@ defmodule Mix.Tasks.Helpdesk.Generate.LiveView.Index do
         id="#{id}"
         name="#{module_plural_name}_form"
         path={"#{path}"}
+        tenant={@current_tenant}
       />
     </.modal>
     </div>
@@ -139,14 +140,16 @@ defmodule Mix.Tasks.Helpdesk.Generate.LiveView.Index do
 
       @impl true
       def mount(_params, _session, socket) do
-        #org_slug = params["org_slug"]
-        current_tenant = nil
+        org_slug = params["org_slug"]
+        {:ok, org} = Helpdesk.Orgs.org_by_slug(org_slug)
+        current_tenant = org.id
+
         read_options = Keyword.put([], :page, limit: @limit, offset: @offset)
 
         {:ok,
         socket
         |> assign(index_params: nil)
-        #|> assign(:org_slug, org_slug)
+        |> assign(:org_slug, org_slug)
         |> assign(:current_tenant, current_tenant)
         |> assign(:domain, #{domain})
         |> assign(:resource, #{module})
@@ -192,12 +195,6 @@ defmodule Mix.Tasks.Helpdesk.Generate.LiveView.Index do
         |> assign(index_params: params)
       end
 
-      defp current_index_path(index_params, current_tenant) do
-        index_params = index_params || %{}
-        # EEx.eval_string("/app/org/<%= @current_tenant %>/#{module_plural_name}?<%= @index_params %>", assigns: [current_tenant: current_tenant, index_params: index_params])
-        # TODO a better way to do it
-        EEx.eval_string("/app/org/#{module_plural_name}?<%= @index_params %>", assigns: [index_params: index_params])
-      end
       """
 
     index_module = get_module_name(igniter, module)
