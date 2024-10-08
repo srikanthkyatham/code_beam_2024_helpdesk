@@ -50,6 +50,15 @@ defmodule Helpdesk.Accounts.User do
     attribute :hashed_password, :string, allow_nil?: false, sensitive?: true
   end
 
+  relationships do
+    belongs_to :org, Helpdesk.Orgs.Org do
+      attribute_type :integer
+      public? true
+    end
+
+    has_many :membership, Helpdesk.Orgs.Membership
+  end
+
   identities do
     identity :unique_email, [:email]
   end
