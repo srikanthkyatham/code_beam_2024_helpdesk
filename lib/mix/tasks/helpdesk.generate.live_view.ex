@@ -21,8 +21,7 @@ defmodule Mix.Tasks.Helpdesk.Generate.LiveView do
   end
 
   defp add_live_views_to_router(igniter, modules) do
-    {igniter, routers} = Igniter.Libs.Phoenix.list_routers(igniter)
-    router = List.first(routers)
+    # {igniter, routers} = Igniter.Libs.Phoenix.list_routers(igniter)
     web_module = web_module(igniter)
 
     before_code = """
@@ -35,23 +34,21 @@ defmodule Mix.Tasks.Helpdesk.Generate.LiveView do
 
     """
 
-    code = get_routes(igniter, modules)
+    code = get_routes(modules)
     after_code = "end"
 
     all_code = before_code <> code <> after_code
 
-    options = [router: router, with_pipelines: [:browser]]
+    # options = [router: router, with_pipelines: [:browser]]
 
     # Igniter.Libs.Phoenix.append_to_scope(igniter, route, all_code, options)
 
     Igniter.add_notice(igniter, all_code)
   end
 
-  defp get_routes(igniter, modules) do
+  defp get_routes(modules) do
     contents = """
     """
-
-    web_module = web_module(igniter)
 
     Enum.reduce(modules, contents, fn module, acc ->
       scope_path = scope_path()

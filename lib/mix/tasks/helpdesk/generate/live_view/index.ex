@@ -68,7 +68,8 @@ defmodule Mix.Tasks.Helpdesk.Generate.LiveView.Index do
 
     form_component_name = form_component_name(igniter)
 
-    base_path = scope_path() <> "/#{@org_slug}/" <> module_plural_name
+    base_path = scope_path() <> "/" <> "#" <> "{" <> "@org_slug}/" <> module_plural_name
+    inferred_path = "#" <> "{" <> "@path}"
 
     code_end = """
     </.live_component>
@@ -87,7 +88,7 @@ defmodule Mix.Tasks.Helpdesk.Generate.LiveView.Index do
       :if={@live_action in [:new, :edit]}
       id="modal"
       show
-      on_cancel={JS.patch("#{@path}")}
+      on_cancel={JS.patch(#{inferred_path})}
     >
       <.live_component
         module={#{form_component_name}}
