@@ -2,17 +2,19 @@ defmodule Helpdesk.Support.Ticket do
   use Ash.Resource,
     otp_app: :helpdesk,
     domain: Helpdesk.Support,
-    data_layer: AshPostgres.DataLayer
+    data_layer: AshPostgres.DataLayer,
+    authorizers: [Ash.Policy.Authorizer],
+    extensions: [AshJsonApi.Resource]
 
   alias Helpdesk.Support.Ticket.Types.Attachment
+
+  json_api do
+    type "ticket"
+  end
 
   postgres do
     table "tickets"
     repo Helpdesk.Repo
-
-    # manage_tenant do
-    #  template(["org_", :id])
-    # end
   end
 
   actions do
@@ -41,6 +43,17 @@ defmodule Helpdesk.Support.Ticket do
     end
   end
 
+  policies do
+    policy always() do
+      authorize_if always()
+    end
+  end
+
+  multitenancy do
+    strategy :attribute
+    attribute :org_id
+  end
+
   attributes do
     uuid_primary_key :id
 
@@ -64,6 +77,10 @@ defmodule Helpdesk.Support.Ticket do
   relationships do
     belongs_to :representative, Helpdesk.Support.Representative do
       public? true
+    end
+
+    belongs_to :org, Helpdesk.Orgs.Org do
+      attribute_type :integer
     end
   end
 end
