@@ -4,9 +4,32 @@ defmodule Helpdesk.Orgs.Org do
     domain: Helpdesk.Orgs,
     data_layer: AshPostgres.DataLayer
 
+  require Ash.Query
+
   postgres do
     table "organizations"
     repo Helpdesk.Repo
+  end
+
+  actions do
+    defaults [:read]
+
+    read :org_by_slug do
+      get? true
+      argument :slug, :string, allow_nil?: false
+
+      prepare fn query, context ->
+        arg_slug = Ash.Query.get_argument(query, :slug)
+
+        query
+        |> Ash.Query.filter(slug == ^arg_slug)
+      end
+    end
+
+    create :create do
+      primary? true
+      accept [:name, :slug]
+    end
   end
 
   attributes do
