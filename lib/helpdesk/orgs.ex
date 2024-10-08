@@ -6,7 +6,9 @@ defmodule Helpdesk.Orgs do
       define :org_by_slug, action: :org_by_slug, args: [:slug]
     end
 
-    resource Helpdesk.Orgs.Membership
+    resource Helpdesk.Orgs.Membership do
+      define :create_membership, action: :create, args: [:role, :user_id, :org_id]
+    end
   end
 
   # api to get Org by id

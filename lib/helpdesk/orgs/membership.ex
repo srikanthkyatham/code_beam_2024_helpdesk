@@ -9,6 +9,18 @@ defmodule Helpdesk.Orgs.Membership do
     repo Helpdesk.Repo
   end
 
+  actions do
+    defaults [:read]
+
+    create :create do
+      accept [:role, :user_id, :org_id]
+    end
+
+    update :assign do
+      accept [:user_id, :org_id]
+    end
+  end
+
   attributes do
     uuid_primary_key :id
 
