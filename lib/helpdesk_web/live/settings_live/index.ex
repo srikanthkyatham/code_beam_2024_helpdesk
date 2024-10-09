@@ -6,21 +6,12 @@ defmodule HelpdeskWeb.Live.SettingsLive.Index do
   attr :current_user, :any, required: true
 
   def org_links(assigns) do
-    dbg()
     current_user = assigns.current_user
-    current_user.__metadata__ |> dbg()
 
     update_current_user = %{
       current_user
       | __metadata__: Map.put(current_user.__metadata__, :tenant, assigns.org.id)
     }
-
-    update_current_user.__metadata__ |> dbg()
-
-    case Map.fetch(update_current_user.__metadata__, :tenant) do
-      {:ok, tenant} -> tenant |> dbg()
-      error -> error |> dbg()
-    end
 
     {:ok, api_token, _} = AshAuthentication.Jwt.token_for_user(update_current_user)
     assigns = assign(assigns, org_slug: assigns.org.slug, api_token: api_token)

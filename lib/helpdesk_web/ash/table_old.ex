@@ -39,7 +39,7 @@ defmodule HelpdeskWeb.Ash.TableOld do
   attr(:record, :any)
 
   def render(assigns) do
-    assigns |> dbg()
+    assigns
 
     ~H"""
     <div class="overflow-y-auto px-4 sm:overflow-visible sm:px-0">
