@@ -4,6 +4,8 @@ defmodule Helpdesk.Orgs.Membership do
     domain: Helpdesk.Orgs,
     data_layer: AshPostgres.DataLayer
 
+  require Ash.Query
+
   postgres do
     table "orgs_membership"
     repo Helpdesk.Repo
@@ -11,6 +13,19 @@ defmodule Helpdesk.Orgs.Membership do
 
   actions do
     defaults [:read]
+
+    read :of_user do
+      get? true
+      argument :user_id, :string, allow_nil?: false
+
+      prepare fn query, context ->
+        arg_user_id = Ash.Query.get_argument(query, :user_id)
+
+        query
+        |> Ash.Query.load([:user, :org])
+        |> Ash.Query.filter(user.id == ^arg_user_id)
+      end
+    end
 
     create :create do
       accept [:role, :user_id, :org_id]

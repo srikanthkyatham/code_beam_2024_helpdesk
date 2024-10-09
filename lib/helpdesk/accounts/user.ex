@@ -56,7 +56,7 @@ defmodule Helpdesk.Accounts.User do
       public? true
     end
 
-    has_many :membership, Helpdesk.Orgs.Membership
+    has_many :memberships, Helpdesk.Orgs.Membership
   end
 
   identities do

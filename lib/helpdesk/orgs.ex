@@ -4,6 +4,7 @@ defmodule Helpdesk.Orgs do
   resources do
     resource Helpdesk.Orgs.Org do
       define :org_by_slug, action: :org_by_slug, args: [:slug]
+      # define :orgs_of_user, action: :orgs_of_user, args: [:user]
     end
 
     resource Helpdesk.Orgs.Membership do

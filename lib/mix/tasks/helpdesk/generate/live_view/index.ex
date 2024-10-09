@@ -88,7 +88,7 @@ defmodule Mix.Tasks.Helpdesk.Generate.LiveView.Index do
       :if={@live_action in [:new, :edit]}
       id="modal"
       show
-      on_cancel={JS.patch(#{inferred_path})}
+      on_cancel={JS.patch("#{inferred_path}")}
     >
       <.live_component
         module={#{form_component_name}}
@@ -140,7 +140,7 @@ defmodule Mix.Tasks.Helpdesk.Generate.LiveView.Index do
       require Logger
 
       @impl true
-      def mount(_params, _session, socket) do
+      def mount(params, _session, socket) do
         org_slug = params["org_slug"]
         {:ok, org} = Helpdesk.Orgs.org_by_slug(org_slug)
         current_tenant = org.id

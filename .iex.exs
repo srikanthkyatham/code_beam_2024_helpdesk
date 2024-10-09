@@ -2,6 +2,7 @@ defmodule AshHelpers do
   @moduledoc false
   """
   create_resource usgae
+
   iex> AshHelpers.create_resource(Org, [name: "org2", slug: "org2"], nil)
   """
 
