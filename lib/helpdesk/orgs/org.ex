@@ -51,7 +51,11 @@ defmodule Helpdesk.Orgs.Org do
   end
 
   relationships do
-    has_many :memberships, Helpdesk.Orgs.Membership
+    many_to_many :users, Helpdesk.Accounts.User do
+      through Helpdesk.Orgs.Membership
+      source_attribute_on_join_resource :org_id
+      destination_attribute_on_join_resource :user_id
+    end
   end
 end
 
