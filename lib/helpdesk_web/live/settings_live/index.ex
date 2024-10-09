@@ -25,14 +25,14 @@ defmodule HelpdeskWeb.Live.SettingsLive.Index do
     </ul>
 
     <p>Api token</p>
-    <p>{@api_token}</p>
+    <p><%= @api_token %></p>
     """
   end
 
   def mount(_params, _session, socket) do
     # get the orgs of the user
     current_user = socket.assigns.current_user |> Ash.load!([:orgs])
-    api_token = AshAuthentication.Jwt.token_for_user(current_user)
+    {:ok, api_token, _} = AshAuthentication.Jwt.token_for_user(current_user)
 
     org_slugs =
       Enum.map(current_user.orgs, fn org ->
