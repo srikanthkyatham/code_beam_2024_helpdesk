@@ -16,7 +16,7 @@ defmodule HelpdeskWeb.Live.SettingsLive.Index do
     # get the orgs of the user
     current_user = socket.assigns.current_user
 
-    Ash.load(current_user, :memberships) |> dbg()
+    Ash.load(current_user, [:memberships]) |> dbg()
     socket.assigns.current_user |> dbg()
     temperature = 0
     # orgs from the user ??

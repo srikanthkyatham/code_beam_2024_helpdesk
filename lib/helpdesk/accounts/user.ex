@@ -26,6 +26,8 @@ defmodule Helpdesk.Accounts.User do
   end
 
   actions do
+    defaults [:read]
+
     read :get_by_subject do
       description "Get a user by the subject claim in a JWT"
       argument :subject, :string, allow_nil?: false
@@ -51,11 +53,6 @@ defmodule Helpdesk.Accounts.User do
   end
 
   relationships do
-    belongs_to :org, Helpdesk.Orgs.Org do
-      attribute_type :integer
-      public? true
-    end
-
     has_many :memberships, Helpdesk.Orgs.Membership
   end
 
