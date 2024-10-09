@@ -12,8 +12,9 @@ defmodule Helpdesk.Repo.Migrations.MigrateResources1 do
       add :id, :uuid, null: false, default: fragment("gen_random_uuid()"), primary_key: true
       add :email, :citext, null: false
       add :hashed_password, :text, null: false
-      add :org_id, :bigint
     end
+
+    create unique_index(:users, [:email], name: "users_unique_email_index")
 
     create table(:tokens, primary_key: false) do
       add :created_at, :utc_datetime_usec,
@@ -82,18 +83,6 @@ defmodule Helpdesk.Repo.Migrations.MigrateResources1 do
       add :id, :bigserial, null: false, primary_key: true
     end
 
-    alter table(:users) do
-      modify :org_id,
-             references(:org,
-               column: :id,
-               name: "users_org_id_fkey",
-               type: :bigint,
-               prefix: "public"
-             )
-    end
-
-    create unique_index(:users, [:email], name: "users_unique_email_index")
-
     alter table(:tickets) do
       modify :org_id,
              references(:org,
@@ -138,14 +127,6 @@ defmodule Helpdesk.Repo.Migrations.MigrateResources1 do
       modify :org_id, :bigint
     end
 
-    drop_if_exists unique_index(:users, [:email], name: "users_unique_email_index")
-
-    drop constraint(:users, "users_org_id_fkey")
-
-    alter table(:users) do
-      modify :org_id, :bigint
-    end
-
     drop table(:org)
 
     drop constraint(:orgs_membership, "orgs_membership_user_id_fkey")
@@ -167,6 +148,8 @@ defmodule Helpdesk.Repo.Migrations.MigrateResources1 do
     drop table(:tickets)
 
     drop table(:tokens)
+
+    drop_if_exists unique_index(:users, [:email], name: "users_unique_email_index")
 
     drop table(:users)
   end

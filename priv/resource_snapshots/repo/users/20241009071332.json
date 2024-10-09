@@ -2,32 +2,32 @@
   "attributes": [
     {
       "allow_nil?": false,
-      "default": "nil",
-      "generated?": true,
+      "default": "fragment(\"gen_random_uuid()\")",
+      "generated?": false,
       "primary_key?": true,
       "references": null,
       "size": null,
       "source": "id",
-      "type": "bigint"
+      "type": "uuid"
     },
     {
-      "allow_nil?": true,
+      "allow_nil?": false,
       "default": "nil",
       "generated?": false,
       "primary_key?": false,
       "references": null,
       "size": null,
-      "source": "name",
-      "type": "text"
+      "source": "email",
+      "type": "citext"
     },
     {
-      "allow_nil?": true,
+      "allow_nil?": false,
       "default": "nil",
       "generated?": false,
       "primary_key?": false,
       "references": null,
       "size": null,
-      "source": "slug",
+      "source": "hashed_password",
       "type": "text"
     }
   ],
@@ -36,8 +36,23 @@
   "custom_indexes": [],
   "custom_statements": [],
   "has_create_action": true,
-  "hash": "2F7B99FCDF324A93C91CBDBAA4A476D96FC26AF809493382CFC8F3C61F276303",
-  "identities": [],
+  "hash": "DBD2153D87E7C0E988CF67B5C4AC9E2DFE5306F07572FABE965966D2D0A4A3A0",
+  "identities": [
+    {
+      "all_tenants?": false,
+      "base_filter": null,
+      "index_name": "users_unique_email_index",
+      "keys": [
+        {
+          "type": "atom",
+          "value": "email"
+        }
+      ],
+      "name": "unique_email",
+      "nils_distinct?": true,
+      "where": null
+    }
+  ],
   "multitenancy": {
     "attribute": null,
     "global": null,
@@ -45,5 +60,5 @@
   },
   "repo": "Elixir.Helpdesk.Repo",
   "schema": null,
-  "table": "org"
+  "table": "users"
 }

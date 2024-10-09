@@ -12,13 +12,36 @@
     },
     {
       "allow_nil?": false,
-      "default": "\"member\"",
+      "default": "nil",
       "generated?": false,
       "primary_key?": false,
       "references": null,
       "size": null,
-      "source": "role",
+      "source": "subject",
       "type": "text"
+    },
+    {
+      "allow_nil?": false,
+      "default": "\"open\"",
+      "generated?": false,
+      "primary_key?": false,
+      "references": null,
+      "size": null,
+      "source": "status",
+      "type": "text"
+    },
+    {
+      "allow_nil?": true,
+      "default": "[]",
+      "generated?": false,
+      "primary_key?": false,
+      "references": null,
+      "size": null,
+      "source": "attachments",
+      "type": [
+        "array",
+        "map"
+      ]
     },
     {
       "allow_nil?": true,
@@ -38,15 +61,15 @@
           "global": null,
           "strategy": null
         },
-        "name": "orgs_membership_user_id_fkey",
+        "name": "tickets_representative_id_fkey",
         "on_delete": null,
         "on_update": null,
         "primary_key?": true,
         "schema": "public",
-        "table": "users"
+        "table": "representatives"
       },
       "size": null,
-      "source": "user_id",
+      "source": "representative_id",
       "type": "uuid"
     },
     {
@@ -67,7 +90,7 @@
           "global": null,
           "strategy": null
         },
-        "name": "orgs_membership_org_id_fkey",
+        "name": "tickets_org_id_fkey",
         "on_delete": null,
         "on_update": null,
         "primary_key?": true,
@@ -84,14 +107,14 @@
   "custom_indexes": [],
   "custom_statements": [],
   "has_create_action": true,
-  "hash": "9EA117A90ECA653A8EB6F7B2834DE9C0D280DA105764FE7699C8816456965450",
+  "hash": "62E216AE37F3F8B7712D0947E208F75AF88D4558208E0643C3789B00465C8883",
   "identities": [],
   "multitenancy": {
-    "attribute": null,
-    "global": null,
-    "strategy": null
+    "attribute": "org_id",
+    "global": false,
+    "strategy": "attribute"
   },
   "repo": "Elixir.Helpdesk.Repo",
   "schema": null,
-  "table": "orgs_membership"
+  "table": "tickets"
 }

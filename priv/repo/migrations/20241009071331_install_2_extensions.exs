@@ -1,4 +1,4 @@
-defmodule Helpdesk.Repo.Migrations.Install2Extensions20241009070535 do
+defmodule Helpdesk.Repo.Migrations.Install2Extensions20241009071329 do
   @moduledoc """
   Installs any extensions that are mentioned in the repo's `installed_extensions/0` callback
 
