@@ -35,8 +35,8 @@
   "check_constraints": [],
   "custom_indexes": [],
   "custom_statements": [],
-  "has_create_action": false,
-  "hash": "7C92AB6519ECEE0287656FF9EF634A4440D8B47BF968682E89C85764D7B47010",
+  "has_create_action": true,
+  "hash": "2F7B99FCDF324A93C91CBDBAA4A476D96FC26AF809493382CFC8F3C61F276303",
   "identities": [],
   "multitenancy": {
     "attribute": null,
@@ -45,5 +45,5 @@
   },
   "repo": "Elixir.Helpdesk.Repo",
   "schema": null,
-  "table": "organizations"
+  "table": "org"
 }

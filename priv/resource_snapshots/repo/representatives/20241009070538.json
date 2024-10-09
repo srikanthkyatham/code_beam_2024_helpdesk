@@ -17,17 +17,7 @@
       "primary_key?": false,
       "references": null,
       "size": null,
-      "source": "email",
-      "type": "citext"
-    },
-    {
-      "allow_nil?": false,
-      "default": "nil",
-      "generated?": false,
-      "primary_key?": false,
-      "references": null,
-      "size": null,
-      "source": "hashed_password",
+      "source": "name",
       "type": "text"
     }
   ],
@@ -36,23 +26,8 @@
   "custom_indexes": [],
   "custom_statements": [],
   "has_create_action": true,
-  "hash": "05366B5D2E4872EA9C04694E8BD5843E1EB1C05C157625D4BBC332E09185436F",
-  "identities": [
-    {
-      "all_tenants?": false,
-      "base_filter": null,
-      "index_name": "users_unique_email_index",
-      "keys": [
-        {
-          "type": "atom",
-          "value": "email"
-        }
-      ],
-      "name": "unique_email",
-      "nils_distinct?": true,
-      "where": null
-    }
-  ],
+  "hash": "471F1066C208E4C0BAA72DCDB22D02DD23A1D9A29CDFDFFCB21D30991699557F",
+  "identities": [],
   "multitenancy": {
     "attribute": null,
     "global": null,
@@ -60,5 +35,5 @@
   },
   "repo": "Elixir.Helpdesk.Repo",
   "schema": null,
-  "table": "users"
+  "table": "representatives"
 }

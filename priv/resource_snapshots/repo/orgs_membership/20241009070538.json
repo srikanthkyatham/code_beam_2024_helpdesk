@@ -12,22 +12,12 @@
     },
     {
       "allow_nil?": false,
-      "default": "nil",
+      "default": "\"member\"",
       "generated?": false,
       "primary_key?": false,
       "references": null,
       "size": null,
-      "source": "email",
-      "type": "citext"
-    },
-    {
-      "allow_nil?": false,
-      "default": "nil",
-      "generated?": false,
-      "primary_key?": false,
-      "references": null,
-      "size": null,
-      "source": "hashed_password",
+      "source": "role",
       "type": "text"
     },
     {
@@ -48,12 +38,41 @@
           "global": null,
           "strategy": null
         },
-        "name": "users_org_id_fkey",
+        "name": "orgs_membership_user_id_fkey",
         "on_delete": null,
         "on_update": null,
         "primary_key?": true,
         "schema": "public",
-        "table": "organizations"
+        "table": "users"
+      },
+      "size": null,
+      "source": "user_id",
+      "type": "uuid"
+    },
+    {
+      "allow_nil?": true,
+      "default": "nil",
+      "generated?": false,
+      "primary_key?": false,
+      "references": {
+        "deferrable": false,
+        "destination_attribute": "id",
+        "destination_attribute_default": null,
+        "destination_attribute_generated": null,
+        "index?": false,
+        "match_type": null,
+        "match_with": null,
+        "multitenancy": {
+          "attribute": null,
+          "global": null,
+          "strategy": null
+        },
+        "name": "orgs_membership_org_id_fkey",
+        "on_delete": null,
+        "on_update": null,
+        "primary_key?": true,
+        "schema": "public",
+        "table": "org"
       },
       "size": null,
       "source": "org_id",
@@ -65,23 +84,8 @@
   "custom_indexes": [],
   "custom_statements": [],
   "has_create_action": true,
-  "hash": "90BB5D5B7A4D6D809A25C8384EABB8FFE248AEFBF418BA679F8265096AFE4B49",
-  "identities": [
-    {
-      "all_tenants?": false,
-      "base_filter": null,
-      "index_name": "users_unique_email_index",
-      "keys": [
-        {
-          "type": "atom",
-          "value": "email"
-        }
-      ],
-      "name": "unique_email",
-      "nils_distinct?": true,
-      "where": null
-    }
-  ],
+  "hash": "9EA117A90ECA653A8EB6F7B2834DE9C0D280DA105764FE7699C8816456965450",
+  "identities": [],
   "multitenancy": {
     "attribute": null,
     "global": null,
@@ -89,5 +93,5 @@
   },
   "repo": "Elixir.Helpdesk.Repo",
   "schema": null,
-  "table": "users"
+  "table": "orgs_membership"
 }

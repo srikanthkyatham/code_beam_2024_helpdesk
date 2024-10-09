@@ -7,7 +7,7 @@ defmodule Helpdesk.Orgs.Org do
   require Ash.Query
 
   postgres do
-    table "organizations"
+    table "org"
     repo Helpdesk.Repo
   end
 

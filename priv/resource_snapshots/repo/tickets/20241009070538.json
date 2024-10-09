@@ -71,6 +71,35 @@
       "size": null,
       "source": "representative_id",
       "type": "uuid"
+    },
+    {
+      "allow_nil?": true,
+      "default": "nil",
+      "generated?": false,
+      "primary_key?": false,
+      "references": {
+        "deferrable": false,
+        "destination_attribute": "id",
+        "destination_attribute_default": null,
+        "destination_attribute_generated": null,
+        "index?": false,
+        "match_type": null,
+        "match_with": null,
+        "multitenancy": {
+          "attribute": null,
+          "global": null,
+          "strategy": null
+        },
+        "name": "tickets_org_id_fkey",
+        "on_delete": null,
+        "on_update": null,
+        "primary_key?": true,
+        "schema": "public",
+        "table": "org"
+      },
+      "size": null,
+      "source": "org_id",
+      "type": "bigint"
     }
   ],
   "base_filter": null,
@@ -78,12 +107,12 @@
   "custom_indexes": [],
   "custom_statements": [],
   "has_create_action": true,
-  "hash": "588E914C24931EA553F0F45836ACB2A9E194AC80D5764CDDDD809A261DDD6C18",
+  "hash": "3523EF02002145A509A60ADB0CC26C042A3D923BB5FF7FB7E178351926FDA904",
   "identities": [],
   "multitenancy": {
-    "attribute": null,
-    "global": null,
-    "strategy": null
+    "attribute": "org_id",
+    "global": false,
+    "strategy": "attribute"
   },
   "repo": "Elixir.Helpdesk.Repo",
   "schema": null,

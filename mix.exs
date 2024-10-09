@@ -99,7 +99,8 @@ defmodule Helpdesk.MixProject do
         "ash_postgres.generate_migrations",
         "ash_postgres.migrate"
       ],
-      "ash.gen.remove": ["cmd ./scripts/remove_ash_gen_files.sh"]
+      "ash.gen.remove": ["cmd ./scripts/remove_ash_gen_files.sh"],
+      "ash.migrations.remove": ["cmd ./scripts/remove_old_migrations.sh"]
     ]
   end
 end
