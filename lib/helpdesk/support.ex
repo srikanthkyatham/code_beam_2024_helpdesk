@@ -8,6 +8,8 @@ defmodule Helpdesk.Support do
         get :read
         index :read
         post :open
+        patch :update
+        delete :destroy
       end
     end
   end
