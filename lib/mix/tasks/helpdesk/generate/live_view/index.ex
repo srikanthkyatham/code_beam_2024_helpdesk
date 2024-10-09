@@ -33,7 +33,6 @@ defmodule Mix.Tasks.Helpdesk.Generate.LiveView.Index do
           query={#{module}}
           read_options={[{:tenant, @current_tenant}]}
           path={"#{path}"}
-          query={#{module}}
           api={#{domain}}
           resource_id={@resource_id}
           live_action={@live_action}
