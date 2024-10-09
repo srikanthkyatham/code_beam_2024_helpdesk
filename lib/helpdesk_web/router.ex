@@ -19,9 +19,12 @@ defmodule HelpdeskWeb.Router do
   end
 
   scope "/", HelpdeskWeb do
+    pipe_through [:browser]
+
     ash_authentication_live_session :authentication_required,
       on_mount: {HelpdeskWeb.LiveUserAuth, :live_user_required} do
       # Put live routes that require a user to be logged in here
+      live("/auth/settings", Live.SettingsLive.Index, :index)
     end
 
     ash_authentication_live_session :authentication_optional,
