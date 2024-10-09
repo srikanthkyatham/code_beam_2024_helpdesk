@@ -1,9 +1,9 @@
-<div>
-<table>
+<div class="overflow-y-auto px-4 sm:overflow-visible sm:px-0">
+<table class="w-[40rem] mt-11 sm:w-full">
   <%= if assigns[:caption] do %>
     <caption id="caption"><%= @caption %></caption>
   <% end %>
-  <thead>
+  <thead class="text-sm text-left leading-6 text-zinc-500">
     <tr>
       <%= for col <- @col, Map.get(col, :when, true) do %>
         <%= if Map.has_key?(col, :sort_key) do %>
@@ -18,11 +18,11 @@
       <% end %>
     </tr>
   </thead>
-  <tbody>
+  <tbody class="relative divide-y divide-zinc-100 border-t border-zinc-200 text-sm leading-6 text-zinc-700">
     <%= for row <- rows_from(@results) do %>
-      <tr class={assigns[:row_class]}>
+      <tr class="group hover:bg-zinc-50">
         <%= for col <- @col, Map.get(col, :when, true) do %>
-          <td class={assigns[:cell_class]}>
+          <td class={["relative p-0"]}>
             <%= render_slot(col, row) %>
           </td>
         <% end %>
