@@ -1,5 +1,5 @@
 defmodule HelpdeskWeb.AshJsonApiRouter do
   use AshJsonApi.Router,
-    domains: [],
+    domains: [Helpdesk.Support],
     open_api: "/open_api"
 end

@@ -2,10 +2,31 @@ defmodule HelpdeskWeb.Live.SettingsLive.Index do
   @moduledoc false
   use Phoenix.LiveView
 
-  attr :org_slug, :string, required: true
+  attr :org, :string, required: true
+  attr :current_user, :any, required: true
 
   def org_links(assigns) do
+    dbg()
+    current_user = assigns.current_user
+    current_user.__metadata__ |> dbg()
+
+    update_current_user = %{
+      current_user
+      | __metadata__: Map.put(current_user.__metadata__, :tenant, assigns.org.id)
+    }
+
+    update_current_user.__metadata__ |> dbg()
+
+    case Map.fetch(update_current_user.__metadata__, :tenant) do
+      {:ok, tenant} -> tenant |> dbg()
+      error -> error |> dbg()
+    end
+
+    {:ok, api_token, _} = AshAuthentication.Jwt.token_for_user(update_current_user)
+    assigns = assign(assigns, org_slug: assigns.org.slug, api_token: api_token)
+
     ~H"""
+    <h2>Links of <%= @org_slug %></h2>
     <ul>
       <li><.link navigate={"/auth/#{@org_slug}/tickets"} class="underline">Tickets</.link></li>
       <li>
@@ -13,6 +34,8 @@ defmodule HelpdeskWeb.Live.SettingsLive.Index do
           Representatives
         </.link>
       </li>
+      <p>Api token</p>
+      <p><%= @api_token %></p>
     </ul>
     """
   end
@@ -20,32 +43,25 @@ defmodule HelpdeskWeb.Live.SettingsLive.Index do
   def render(assigns) do
     ~H"""
     Current temperature: <%= @temperature %>°F <button phx-click="inc_temperature">+</button>
-    <ul :for={org_slug <- @org_slugs}>
-      <.org_links org_slug={org_slug} />
+    <ul :for={org <- @orgs}>
+      <.org_links org={org} current_user={@current_user} />
     </ul>
-
-    <p>Api token</p>
-    <p><%= @api_token %></p>
     """
   end
 
   def mount(_params, _session, socket) do
     # get the orgs of the user
     current_user = socket.assigns.current_user |> Ash.load!([:orgs])
-    {:ok, api_token, _} = AshAuthentication.Jwt.token_for_user(current_user)
+    # %{selected: [:id, :email, :hashed_password], keyset: "g2o="}
 
-    org_slugs =
-      Enum.map(current_user.orgs, fn org ->
-        org.slug
-      end)
+    orgs = current_user.orgs
 
     temperature = 0
     # orgs from the user ??
 
     {:ok,
      assign(socket, :temperature, temperature)
-     |> assign(:org_slugs, org_slugs)
-     |> assign(:api_token, api_token)}
+     |> assign(:orgs, orgs)}
   end
 
   def handle_event("inc_temperature", _params, socket) do

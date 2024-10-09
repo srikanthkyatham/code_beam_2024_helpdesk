@@ -2,6 +2,8 @@ defmodule HelpdeskWeb.Router do
   use HelpdeskWeb, :router
 
   use AshAuthentication.Phoenix.Router
+  import HelpdeskWeb.UserAuth
+  # import AshAuthentication.Plug.Helpers, only: [retrieve_from_bearer: 2, set_actor: 2]
 
   pipeline :browser do
     plug :accepts, ["html"]
@@ -18,6 +20,11 @@ defmodule HelpdeskWeb.Router do
     plug :load_from_bearer
   end
 
+  pipeline :api_authenticated do
+    plug :get_actor_from_ash_token
+    plug :put_tenant
+  end
+
   scope "/", HelpdeskWeb do
     pipe_through [:browser]
 
@@ -25,6 +32,19 @@ defmodule HelpdeskWeb.Router do
       on_mount: {HelpdeskWeb.LiveUserAuth, :live_user_required} do
       # Put live routes that require a user to be logged in here
       live("/auth/settings", Live.SettingsLive.Index, :index)
+      live("/auth/:org_slug/tickets", Live.TicketLive.Index, :index)
+      live("/auth/:org_slug/tickets/new", Live.TicketLive.Index, :new)
+      live("/auth/:org_slug/tickets/:id/edit", Live.TicketLive.Index, :edit)
+
+      live("/auth/:org_slug/tickets/:id", Live.TicketLive.Show, :show)
+      live("/auth/:org_slug/tickets/:id/show/edit", Live.TicketLive.Show, :edit)
+
+      live("/auth/:org_slug/representatives", Live.RepresentativeLive.Index, :index)
+      live("/auth/:org_slug/representatives/new", Live.RepresentativeLive.Index, :new)
+      live("/auth/:org_slug/representatives/:id/edit", Live.RepresentativeLive.Index, :edit)
+
+      live("/auth/:org_slug/representatives/:id", Live.RepresentativeLive.Show, :show)
+      live("/auth/:org_slug/representatives/:id/show/edit", Live.RepresentativeLive.Show, :edit)
     end
 
     ash_authentication_live_session :authentication_optional,
@@ -39,7 +59,7 @@ defmodule HelpdeskWeb.Router do
   end
 
   scope "/api/json" do
-    pipe_through [:api]
+    pipe_through [:api, :api_authenticated]
 
     forward "/swaggerui",
             OpenApiSpex.Plug.SwaggerUI,
