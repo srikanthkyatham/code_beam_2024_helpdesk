@@ -15,4 +15,12 @@ defmodule AshHelpers do
     )
     |> Ash.create()
   end
+
+  """
+  Api token for a given user
+  """
+
+  def create_user_token(user) do
+    AshAuthentication.Jwt.token_for_user(user)
+  end
 end
