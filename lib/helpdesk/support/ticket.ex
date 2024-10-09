@@ -49,7 +49,11 @@ defmodule Helpdesk.Support.Ticket do
   end
 
   policies do
-    policy always() do
+    policy action(:destroy) do
+      authorize_if Helpdesk.Checks.ActorIsAdmin
+    end
+
+    policy action_type([:create, :update, :read]) do
       authorize_if always()
     end
   end

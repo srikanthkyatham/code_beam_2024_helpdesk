@@ -14,7 +14,7 @@ defmodule Helpdesk.Orgs.Membership do
   actions do
     defaults [:read]
 
-    read :of_user do
+    read :membership_of_user do
       get? true
       argument :user_id, :string, allow_nil?: false
 

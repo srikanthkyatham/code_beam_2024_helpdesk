@@ -4,7 +4,6 @@ defmodule HelpdeskWeb.UserAuth do
   This module is imported into the router and thus any function can be called there as a plug.
   """
   use HelpdeskWeb, :verified_routes
-  import Plug.Conn
 
   def put_tenant(conn, _opts) do
     tenant = conn.query_params["tenant"]
@@ -27,7 +26,6 @@ defmodule HelpdeskWeb.UserAuth do
       |> retrieve_tenant_from_bearer(otp_app)
       |> AshAuthentication.Plug.Helpers.retrieve_from_bearer(otp_app)
 
-    current_user = Map.get(conn.assigns, :current_user)
     conn
   end
 
@@ -37,8 +35,11 @@ defmodule HelpdeskWeb.UserAuth do
     |> Stream.filter(&String.starts_with?(&1, "Bearer "))
     |> Stream.map(&String.replace_leading(&1, "Bearer ", ""))
     |> Enum.reduce(conn, fn token, conn ->
-      with {:ok, %{"tenant" => tenant}, _} <- AshAuthentication.Jwt.verify(token, otp_app) do
+      with {:ok, %{"tenant" => tenant, "sub" => subject}, resource} <-
+             AshAuthentication.Jwt.verify(token, otp_app),
+           {:ok, subject_name} <- AshAuthentication.Info.authentication_subject_name(resource) do
         Ash.PlugHelpers.set_tenant(conn, tenant)
+        |> AshAuthentication.Plug.Helpers.set_actor(subject_name)
       else
         _ -> conn
       end
