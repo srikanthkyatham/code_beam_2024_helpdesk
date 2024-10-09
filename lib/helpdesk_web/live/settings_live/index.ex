@@ -23,12 +23,16 @@ defmodule HelpdeskWeb.Live.SettingsLive.Index do
     <ul :for={org_slug <- @org_slugs}>
       <.org_links org_slug={org_slug} />
     </ul>
+
+    <p>Api token</p>
+    <p>{@api_token}</p>
     """
   end
 
   def mount(_params, _session, socket) do
     # get the orgs of the user
     current_user = socket.assigns.current_user |> Ash.load!([:orgs])
+    api_token = AshAuthentication.Jwt.token_for_user(current_user)
 
     org_slugs =
       Enum.map(current_user.orgs, fn org ->
@@ -40,7 +44,8 @@ defmodule HelpdeskWeb.Live.SettingsLive.Index do
 
     {:ok,
      assign(socket, :temperature, temperature)
-     |> assign(:org_slugs, org_slugs)}
+     |> assign(:org_slugs, org_slugs)
+     |> assign(:api_token, api_token)}
   end
 
   def handle_event("inc_temperature", _params, socket) do
