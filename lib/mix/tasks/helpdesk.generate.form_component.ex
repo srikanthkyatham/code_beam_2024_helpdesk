@@ -503,7 +503,7 @@ defmodule Mix.Tasks.Helpdesk.Generate.FormComponent do
       ~H\"""
       <div>
         <.header :if={@live_action == :new}>New <%= Info.short_name(@resource) %></.header>
-        <.header if={@live_action == :edit}>Edit <%= Info.short_name(@resource) %></.header>
+        <.header :if={@live_action == :edit}>Edit <%= Info.short_name(@resource) %></.header>
         <.simple_form
           for={@form}
           phx-change="validate"
