@@ -57,7 +57,7 @@ defmodule Mix.Tasks.Helpdesk.Generate.LiveView.Index do
 
         col_row = """
              <:col :let={record} label="#{label}">
-              <div class="text-center"><%= record.#{name} %></div>
+              <%= record.#{name} %>
              </:col>
         """
 
