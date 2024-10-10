@@ -60,13 +60,19 @@ defmodule Mix.Tasks.Helpdesk.Generate.FormComponent do
         value,
         name
       ) do
-      assigns = assign(assigns, form: form, value: value, name: name, attribute: attribute)
+      assigns =
+        assign(assigns,
+        form: form,
+        value: value,
+        name: name,
+        attribute: attribute,
+        label: attribute_name(attribute) |> String.capitalize())
 
       ~H\"""
         <.input
           type="select"
-          label="#{base_module_name}"
-          name="#{base_module_name}"
+          field={@form[@attribute.name]}
+          label="@label"
           options={#{module_name}.options()}
           value={#{module_name}.to_methods(@form[@attribute.name])}
         />
@@ -378,11 +384,12 @@ defmodule Mix.Tasks.Helpdesk.Generate.FormComponent do
 
     if_result =
       if assigns.live_action == :new do
-        AshPhoenix.Form.for_create(resource, :create, api: api, prepare_params: prepare_params)
+        AshPhoenix.Form.for_create(resource, :create, api: api, prepare_params: prepare_params, forms:[auto?: true])
       else
         AshPhoenix.Form.for_update(assigns.record, :update,
           api: api,
-          prepare_params: prepare_params
+          prepare_params: prepare_params,
+          forms:[auto?: true]
         )
       end
 
@@ -561,10 +568,7 @@ defmodule Mix.Tasks.Helpdesk.Generate.FormComponent do
         Enum.reduce(fields, [], fn attribute, acc ->
           # even enum types
           # check whether the module has the needs_prepare_params
-          if is_atom(attribute.type) and
-             ((Ash.Type.embedded_type?(attribute.type) and
-                 function_exported?(attribute.type, :prepare_params, 2)) ||
-                function_exported?(attribute.type, :prepare_params, 2)) do
+          if is_attribute_enum_type(attribute) do
             Enum.concat(acc, [&attribute.type.prepare_params/2])
           else
             acc
@@ -579,6 +583,14 @@ defmodule Mix.Tasks.Helpdesk.Generate.FormComponent do
 
       prepare_params
     end
+
+    def is_attribute_enum_type(attribute) do
+      is_atom(attribute.type) and
+        ((Ash.Type.embedded_type?(attribute.type) and
+            function_exported?(attribute.type, :prepare_params, 2)) ||
+            function_exported?(attribute.type, :prepare_params, 2))
+    end
+
 
     """
 

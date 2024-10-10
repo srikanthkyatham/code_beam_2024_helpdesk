@@ -35,7 +35,7 @@ defmodule HelpdeskWeb.UserAuth do
     |> Stream.filter(&String.starts_with?(&1, "Bearer "))
     |> Stream.map(&String.replace_leading(&1, "Bearer ", ""))
     |> Enum.reduce(conn, fn token, conn ->
-      with {:ok, %{"tenant" => tenant, "sub" => subject}, resource} <-
+      with {:ok, %{"tenant" => tenant}, resource} <-
              AshAuthentication.Jwt.verify(token, otp_app),
            {:ok, subject_name} <- AshAuthentication.Info.authentication_subject_name(resource) do
         Ash.PlugHelpers.set_tenant(conn, tenant)

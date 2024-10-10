@@ -55,12 +55,16 @@ defmodule Mix.Tasks.Helpdesk.Generate.PrepareEnumResources do
         end
 
         def prepare_params(params, _) do
-          atomised =
-            params
-            |> Map.get("#{param_name}", [])
-            |> to_methods()
+          if is_map(params) && Map.get(params, "#{param_name}") != nil do
+            atomised =
+              params
+              |> Map.get("#{param_name}", [])
+              |> to_methods()
 
-          Map.put(params, "#{param_name}", atomised)
+            Map.put(params, "#{param_name}", atomised)
+          else
+            params
+          end
         end
 
         """
@@ -88,8 +92,8 @@ defmodule Mix.Tasks.Helpdesk.Generate.PrepareEnumResources do
       Enum.map(methods, fn method -> to_method.(method) end)
     end
 
-    def to_strings(_methods, _to_method) do
-      []
+    def to_strings(value, to_method) do
+      to_method.(value)
     end
 
     def to_methods(params, to_method) when is_list(params) do
@@ -108,6 +112,11 @@ defmodule Mix.Tasks.Helpdesk.Generate.PrepareEnumResources do
     def to_methods(%Phoenix.HTML.FormField{} = form_field, to_method) do
       to_strings(form_field.value, to_method)
     end
+
+    def to_methods(param, to_method) do
+      to_method.(param)
+    end
+
     """
 
     app_name = app_name(igniter)

@@ -21,7 +21,7 @@ defmodule Helpdesk.Support.Ticket do
     defaults [:read, :destroy]
 
     create :create do
-      accept [:subject]
+      accept [:subject, :status]
     end
 
     create :open do
