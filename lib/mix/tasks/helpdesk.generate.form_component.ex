@@ -71,7 +71,7 @@ defmodule Mix.Tasks.Helpdesk.Generate.FormComponent do
         <.input
           type="select"
           field={@form[@attribute.name]}
-          label="@label"
+          label={@label}
           options={#{module_name}.options()}
           value={#{module_name}.to_methods(@form[@attribute.name])}
         />
@@ -363,6 +363,7 @@ defmodule Mix.Tasks.Helpdesk.Generate.FormComponent do
     def update(assigns, socket) do
       resource = assigns.resource
       api = assigns.api
+      tenant = assigns.tenant
 
       fields =
         resource
@@ -372,11 +373,12 @@ defmodule Mix.Tasks.Helpdesk.Generate.FormComponent do
 
       if_result =
         if assigns.live_action == :new do
-          AshPhoenix.Form.for_create(resource, :create, api: api, prepare_params: prepare_params)
+          AshPhoenix.Form.for_create(resource, :create, api: api, prepare_params: prepare_params, tenant: tenant)
         else
           AshPhoenix.Form.for_update(assigns.record, :update,
             api: api,
-            prepare_params: prepare_params
+            prepare_params: prepare_params,
+            tenant: tenant
           )
       end
 
