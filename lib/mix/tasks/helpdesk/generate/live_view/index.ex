@@ -187,7 +187,7 @@ defmodule Mix.Tasks.Helpdesk.Generate.LiveView.Index do
         resource = socket.assigns.resource
 
         record =
-          Ash.get!(resource, id, updated_read_options)
+          Ash.get!(resource, id, read_options)
 
         socket
         |> assign(:page_title, "Edit #{title}")
