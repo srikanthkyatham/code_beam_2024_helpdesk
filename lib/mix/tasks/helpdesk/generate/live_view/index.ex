@@ -99,6 +99,7 @@ defmodule Mix.Tasks.Helpdesk.Generate.LiveView.Index do
         name="#{module_plural_name}_form"
         path={"#{path}"}
         tenant={@current_tenant}
+        url={@url}
       />
     </.modal>
     </div>

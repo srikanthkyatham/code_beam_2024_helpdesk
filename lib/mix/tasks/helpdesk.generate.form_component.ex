@@ -405,7 +405,7 @@ defmodule Mix.Tasks.Helpdesk.Generate.FormComponent do
     def handle_event("save", _, socket) do
       form = socket.assigns.form
       #path = socket.assigns.path
-      path = patch_path(assigns.url)
+      path = patch_path(socket.assigns.url)
 
       #parent_path = "#{scope_path}/" <> path
       parent_path = path
