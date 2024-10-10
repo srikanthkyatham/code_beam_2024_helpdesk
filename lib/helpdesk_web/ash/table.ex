@@ -33,13 +33,15 @@ defmodule AshTable.Table do
     :limit,
     :read_options,
     :path,
-    :url
+    :url,
+    :action
   ]
 
   @default_assigns %{
     limit: 10,
     offset: 0,
-    read_options: []
+    read_options: [],
+    action: []
   }
 
   @type sort :: {atom | nil, :asc | :desc}

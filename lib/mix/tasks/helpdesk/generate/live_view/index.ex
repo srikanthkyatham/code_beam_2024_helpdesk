@@ -62,13 +62,21 @@ defmodule Mix.Tasks.Helpdesk.Generate.LiveView.Index do
         acc <> col_row
       end)
 
+    base_path = scope_path() <> "/" <> "#" <> "{" <> "@org_slug}/" <> module_plural_name
+    inferred_path = "#" <> "{" <> "@path}"
+
+    code_action = """
+      <:action :let={record} label="Edit">
+        <.button phx-click={JS.patch("#{base_path}/#{record.id}/edit")}>
+          Edit
+        </.button>
+      </:action>
+    """
+
     # button
     # modal
 
     form_component_name = form_component_name(igniter)
-
-    base_path = scope_path() <> "/" <> "#" <> "{" <> "@org_slug}/" <> module_plural_name
-    inferred_path = "#" <> "{" <> "@path}"
 
     code_end = """
     </.live_component>
@@ -105,7 +113,7 @@ defmodule Mix.Tasks.Helpdesk.Generate.LiveView.Index do
     </div>
     """
 
-    new_code = code_start <> code_middle <> code_end
+    new_code = code_start <> code_middle <> code_action <> code_end
 
     path = get_module_heex_file_path(igniter, module, "index.html.heex")
     Igniter.create_new_file(igniter, path, new_code)
@@ -171,13 +179,13 @@ defmodule Mix.Tasks.Helpdesk.Generate.LiveView.Index do
       end
 
       defp apply_action(socket, :edit, %{"id" => id}) do
-        #current_tenant = socket.assigns.current_tenant
+        current_tenant = socket.assigns.current_tenant
         domain = socket.assigns.domain
-        read_options = socket.assigns.read_options
+        read_options = Keyword.merge([], tenant: current_tenant, domain: domain)
         resource = socket.assigns.resource
 
         record =
-        domain.get!(resource, id, read_options)
+          Ash.get!(resource, id, updated_read_options)
 
         socket
         |> assign(:page_title, "Edit #{title}")

@@ -285,24 +285,36 @@ defmodule Mix.Tasks.Helpdesk.Generate.FormComponent do
     end
 
     def patch_path(url) do
-      uri = URI.parse(url)
-      uri_path = uri.path
+    uri = URI.parse(url)
+    uri_path = uri.path
 
-      result = String.split(uri_path, "/new")
+    result = String.split(uri_path, "/new")
 
-      case result do
-        [_base] ->
-          result = String.split(uri_path, "/edit")
+    case result do
+      [_base] ->
+        result = String.split(uri_path, "/edit", trim: true)
 
-          case result do
-            [base] -> base
-            [base, query] -> base <> query
-          end
+        get_parent_path = fn base ->
+          split_parts = base |> String.split("/", trim: true)
+          count = Enum.count(split_parts)
 
-        [base, query] ->
-          base <> query
-      end
+          joined_strings =
+            List.delete_at(split_parts, count - 1)
+            |> Enum.join("/")
+
+          "/" <> joined_strings
+        end
+
+        case result do
+          [base] -> get_parent_path.(base)
+          [base, query] -> get_parent_path.(base) <> query
+        end
+
+      [base, query] ->
+        base <> query
     end
+    end
+
     """)
   end
 

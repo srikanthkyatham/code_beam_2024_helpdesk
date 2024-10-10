@@ -1,35 +1,48 @@
 <div class="overflow-y-auto px-4 sm:overflow-visible sm:px-0">
-<table class="w-[40rem] mt-11 sm:w-full">
-  <%= if assigns[:caption] do %>
-    <caption id="caption"><%= @caption %></caption>
-  <% end %>
-  <thead class="text-sm text-left leading-6 text-zinc-500">
-    <tr>
-      <%= for col <- @col, Map.get(col, :when, true) do %>
-        <%= if Map.has_key?(col, :sort_key) do %>
-          <TableHelpers.column_header column={col} sort={@sort}>
-            <TableHelpers.sort_button target={@myself} column={col} sort={@sort} />
-          </TableHelpers.column_header>
-        <% else %>
-          <TableHelpers.column_header column={col} sort={@sort}>
-            <%= col.label %>
-          </TableHelpers.column_header>
-        <% end %>
-      <% end %>
-    </tr>
-  </thead>
-  <tbody class="relative divide-y divide-zinc-100 border-t border-zinc-200 text-sm leading-6 text-zinc-700">
-    <%= for row <- rows_from(@results) do %>
-      <tr class="group hover:bg-zinc-50">
-        <%= for col <- @col, Map.get(col, :when, true) do %>
-          <td class={["relative p-0"]}>
-            <%= render_slot(col, row) %>
-          </td>
-        <% end %>
-      </tr>
+  <table class="w-[40rem] mt-11 sm:w-full">
+    <%= if assigns[:caption] do %>
+      <caption id="caption"><%= @caption %></caption>
     <% end %>
-  </tbody>
-</table>
-<TableHelpers.paginator target={@myself} :if={assigns[:limit]} results={@results}/>
+    <thead class="text-sm text-left leading-6 text-zinc-500">
+      <tr>
+        <%= for col <- @col, Map.get(col, :when, true) do %>
+          <%= if Map.has_key?(col, :sort_key) do %>
+            <TableHelpers.column_header column={col} sort={@sort}>
+              <TableHelpers.sort_button target={@myself} column={col} sort={@sort} />
+            </TableHelpers.column_header>
+          <% else %>
+            <TableHelpers.column_header column={col} sort={@sort}>
+              <%= col.label %>
+            </TableHelpers.column_header>
+          <% end %>
+        <% end %>
+        <th :if={@action != []} class="relative p-0 pb-4">
+          <span class="sr-only">Actions</span>
+        </th>
+      </tr>
+    </thead>
+    <tbody class="relative divide-y divide-zinc-100 border-t border-zinc-200 text-sm leading-6 text-zinc-700">
+      <%= for row <- rows_from(@results) do %>
+        <tr class="group hover:bg-zinc-50">
+          <%= for col <- @col, Map.get(col, :when, true) do %>
+            <td class={["relative p-0"]}>
+              <%= render_slot(col, row) %>
+            </td>
+          <% end %>
+          <td :if={@action != []} class="relative w-14 p-0">
+            <div class="relative whitespace-nowrap py-4 text-right text-sm font-medium">
+              <span class="absolute -inset-y-px -right-4 left-0 group-hover:bg-zinc-50 sm:rounded-r-xl" />
+              <span
+                :for={action <- @action}
+                class="relative ml-4 font-semibold leading-6 text-zinc-900 hover:text-zinc-700"
+              >
+                <%= render_slot(action, row) %>
+              </span>
+            </div>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+  <TableHelpers.paginator :if={assigns[:limit]} target={@myself} results={@results} />
 </div>
-  
