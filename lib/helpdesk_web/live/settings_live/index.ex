@@ -51,8 +51,4 @@ defmodule HelpdeskWeb.Live.SettingsLive.Index do
      assign(socket, :orgs, orgs)
      |> assign(:role, role)}
   end
-
-  def handle_event("inc_temperature", _params, socket) do
-    {:noreply, update(socket, :temperature, &(&1 + 1))}
-  end
 end
