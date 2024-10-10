@@ -26,18 +26,6 @@ defmodule Helpdesk.Orgs.Org do
       end
     end
 
-    # read :orgs_of_user do
-    #   get? true
-    #   argument :user, :string, allow_nil?: false
-
-    #   prepare fn query, context ->
-    #     arg_slug = Ash.Query.get_argument(query, :slug)
-
-    #     query
-    #     |> Ash.Query.filter(slug == ^arg_slug)
-    #   end
-    # end
-
     create :create do
       primary? true
       accept [:name, :slug]
