@@ -343,6 +343,7 @@ defmodule Mix.Tasks.Helpdesk.Generate.FormComponent do
     statics: #{web_module}.static_paths()
 
     import #{web_module}.CoreComponents
+    import #{web_module}.Ash.FormHelper
 
     alias Ash.Resource.Info
 
@@ -359,66 +360,55 @@ defmodule Mix.Tasks.Helpdesk.Generate.FormComponent do
     \"""
 
 
-    @assigns [
-    :id,
-    :name,
-    :resource,
-    :live_action,
-    :record,
-    :api,
-    :path,
-    ]
-
-
-
     def update(assigns, socket) do
-    resource = assigns.resource
-    api = assigns.api
+      resource = assigns.resource
+      api = assigns.api
 
-    fields =
-      resource
-      |> #{web_module}.Ash.FormHelper.fields_of_resource()
+      fields =
+        resource
+        |> #{web_module}.Ash.FormHelper.fields_of_resource()
 
-    prepare_params = collect_prepare_params(fields)
+      prepare_params = collect_prepare_params(fields)
 
-    if_result =
-      if assigns.live_action == :new do
-        AshPhoenix.Form.for_create(resource, :create, api: api, prepare_params: prepare_params, forms:[auto?: true])
-      else
-        AshPhoenix.Form.for_update(assigns.record, :update,
-          api: api,
-          prepare_params: prepare_params,
-          forms:[auto?: true]
-        )
+      if_result =
+        if assigns.live_action == :new do
+          AshPhoenix.Form.for_create(resource, :create, api: api, prepare_params: prepare_params)
+        else
+          AshPhoenix.Form.for_update(assigns.record, :update,
+            api: api,
+            prepare_params: prepare_params
+          )
       end
 
-    form =
-      to_form(if_result)
+      form =
+        to_form(if_result)
 
-    {:ok,
-     assign(
-       socket,
-       Map.merge(assigns, %{
-         resource: resource,
-         api: api,
-         fields: fields,
-         form: form
-       })
-     )}
+      {:ok,
+        assign(
+          socket,
+          Map.merge(assigns, %{
+            resource: resource,
+            api: api,
+            fields: fields,
+            form: form
+          })
+      )}
     end
 
 
     def handle_event("validate", %{"form" => params}, socket) do
-    form = AshPhoenix.Form.validate(socket.assigns.form, params || %{})
+      form = AshPhoenix.Form.validate(socket.assigns.form, params || %{})
 
-    {:noreply, assign(socket, :form, form)}
+      {:noreply, assign(socket, :form, form)}
     end
 
     def handle_event("save", _, socket) do
-    form = socket.assigns.form
-    path = socket.assigns.path
+      form = socket.assigns.form
+      #path = socket.assigns.path
+      path = patch_path(assigns.url)
 
-    parent_path = "#{scope_path}/" <> path
+      #parent_path = "#{scope_path}/" <> path
+      parent_path = path
 
     case AshPhoenix.Form.submit(form,
            params: form.source.params,
