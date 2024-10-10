@@ -65,9 +65,11 @@ defmodule Mix.Tasks.Helpdesk.Generate.LiveView.Index do
     base_path = scope_path() <> "/" <> "#" <> "{" <> "@org_slug}/" <> module_plural_name
     inferred_path = "#" <> "{" <> "@path}"
 
+    inferred_record = "#" <> "{" <> "record.id" <> "}"
+
     code_action = """
       <:action :let={record} label="Edit">
-        <.button phx-click={JS.patch("#{base_path}/#{record.id}/edit")}>
+        <.button phx-click={JS.patch("#{base_path}/#{inferred_record}/edit")}>
           Edit
         </.button>
       </:action>
