@@ -85,11 +85,10 @@ defmodule Mix.Tasks.Helpdesk.Generate.LiveView.Index do
     code_end = """
     </.live_component>
 
-    <div class="flex px-3 py-2 bg-gray-100 gap-2">
+    <div class="flex py-10 gap-2">
       <.button
         phx-click={JS.patch("#{base_path}/new")}
         type="button"
-        class="rounded bg-white px-3 py-1 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
       >
         <.icon name="hero-plus" class="h-4 -mt-1" />Create
       </.button>
