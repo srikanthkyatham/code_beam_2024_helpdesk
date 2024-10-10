@@ -56,9 +56,9 @@ defmodule Mix.Tasks.Helpdesk.Generate.LiveView.Index do
         label = name |> String.capitalize()
 
         col_row = """
-           <div class="text-center">
-             <:col :let={record} label="#{label}"><%= record.#{name} %></:col>
-           </div>
+             <:col :let={record} label="#{label}">
+              <div class="text-center"><%= record.#{name} %></div>
+             </:col>
         """
 
         acc <> col_row
