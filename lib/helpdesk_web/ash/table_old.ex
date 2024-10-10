@@ -39,8 +39,6 @@ defmodule HelpdeskWeb.Ash.TableOld do
   attr(:record, :any)
 
   def render(assigns) do
-    assigns
-
     ~H"""
     <div class="overflow-y-auto px-4 sm:overflow-visible sm:px-0">
       <table class="w-[40rem] mt-11 sm:w-full">
