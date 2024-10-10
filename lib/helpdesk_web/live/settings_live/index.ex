@@ -33,7 +33,6 @@ defmodule HelpdeskWeb.Live.SettingsLive.Index do
 
   def render(assigns) do
     ~H"""
-    Current temperature: <%= @temperature %>°F <button phx-click="inc_temperature">+</button>
     <ul :for={org <- @orgs}>
       <.org_links org={org} current_user={@current_user} />
     </ul>
@@ -41,18 +40,16 @@ defmodule HelpdeskWeb.Live.SettingsLive.Index do
   end
 
   def mount(_params, _session, socket) do
-    # get the orgs of the user
     current_user = socket.assigns.current_user |> Ash.load!([:orgs])
-    # %{selected: [:id, :email, :hashed_password], keyset: "g2o="}
-
     orgs = current_user.orgs
 
-    temperature = 0
-    # orgs from the user ??
+    is_admin =
+      Helpdesk.Orgs.membership_of_user!(current_user.id)
+      |> Helpdesk.Checks.ActorIsAdmin.is_admin?()
 
     {:ok,
-     assign(socket, :temperature, temperature)
-     |> assign(:orgs, orgs)}
+     assign(socket, :orgs, orgs)
+     |> assign(:admin, is_admin)}
   end
 
   def handle_event("inc_temperature", _params, socket) do
