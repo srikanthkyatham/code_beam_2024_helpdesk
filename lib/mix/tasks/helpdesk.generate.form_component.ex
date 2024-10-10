@@ -50,7 +50,6 @@ defmodule Mix.Tasks.Helpdesk.Generate.FormComponent do
 
   def for_every_enum_module(zipper, enum_resource) do
     module_name = enum_resource |> Atom.to_string()
-    base_module_name = get_module_base_name(enum_resource) |> String.capitalize()
 
     new_code = """
     def render_attribute_input(
