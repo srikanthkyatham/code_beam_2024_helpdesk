@@ -36,6 +36,7 @@ defmodule HelpdeskWeb.Live.SettingsLive.Index do
     <ul :for={org <- @orgs}>
       <.org_links org={org} current_user={@current_user} />
     </ul>
+    <h4>Role <%= @role %></h4>
     """
   end
 
@@ -43,13 +44,12 @@ defmodule HelpdeskWeb.Live.SettingsLive.Index do
     current_user = socket.assigns.current_user |> Ash.load!([:orgs])
     orgs = current_user.orgs
 
-    is_admin =
-      Helpdesk.Orgs.membership_of_user!(current_user.id)
-      |> Helpdesk.Checks.ActorIsAdmin.is_admin?()
+    role =
+      Helpdesk.Orgs.membership_of_user!(current_user.id).role |> Atom.to_string()
 
     {:ok,
      assign(socket, :orgs, orgs)
-     |> assign(:admin, is_admin)}
+     |> assign(:role, role)}
   end
 
   def handle_event("inc_temperature", _params, socket) do
