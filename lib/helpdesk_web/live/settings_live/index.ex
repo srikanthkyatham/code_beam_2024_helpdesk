@@ -1,6 +1,7 @@
 defmodule HelpdeskWeb.Live.SettingsLive.Index do
   @moduledoc false
   use Phoenix.LiveView
+  import HelpdeskWeb.CoreComponents
 
   attr :org, :string, required: true
   attr :current_user, :any, required: true
@@ -17,27 +18,31 @@ defmodule HelpdeskWeb.Live.SettingsLive.Index do
     assigns = assign(assigns, org_slug: assigns.org.slug, api_token: api_token)
 
     ~H"""
-    <h2>Links of <%= @org_slug %></h2>
-    <ul>
-      <li><.link navigate={"/auth/#{@org_slug}/tickets"} class="underline">Tickets</.link></li>
-      <li>
-        <.link navigate={"/auth/#{@org_slug}/representatives"} class="underline">
-          Representatives
-        </.link>
-      </li>
-      <p>Api token</p>
-      <p><%= @api_token %></p>
-    </ul>
+    <h2 class="py-2 px-2 font-semibold"><%= @org_slug %></h2>
+    <div class="px-4">
+      <p>
+        <bold class="font-medium">Api token:</bold>
+        <%= @api_token %>
+      </p>
+      <ul class="py-2">
+        <li><.link navigate={"/auth/#{@org_slug}/tickets"} class="underline">Tickets</.link></li>
+        <li>
+          <.link navigate={"/auth/#{@org_slug}/representatives"} class="underline">
+            Representatives
+          </.link>
+        </li>
+      </ul>
+    </div>
     """
   end
 
   def render(assigns) do
     ~H"""
-    <h1>Settings</h1>
+    <.header class="px-2">Settings</.header>
+    <h3 class="py-2 px-2">Role <%= @role %></h3>
     <ul :for={org <- @orgs}>
       <.org_links org={org} current_user={@current_user} />
     </ul>
-    <h3>Role <%= @role %></h3>
     """
   end
 
