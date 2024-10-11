@@ -33,10 +33,11 @@ defmodule HelpdeskWeb.Live.SettingsLive.Index do
 
   def render(assigns) do
     ~H"""
+    <h1>Settings</h1>
     <ul :for={org <- @orgs}>
       <.org_links org={org} current_user={@current_user} />
     </ul>
-    <h4>Role <%= @role %></h4>
+    <h3>Role <%= @role %></h3>
     """
   end
 
