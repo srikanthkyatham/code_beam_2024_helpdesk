@@ -58,7 +58,7 @@
           class="border-4 border-gray-200 border-dashed rounded-lg h-96"
         >
           <%= if @current_user do %>
-            <ul>
+            <ul class="px-2 py-2 text-2xl">
               <li><.link navigate={~p"/auth/settings"} class="underline">Settings</.link></li>
             </ul>
           <% end %>
