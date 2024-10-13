@@ -9,14 +9,8 @@ defmodule Mix.Tasks.Helpdesk.Generate.LiveView.Index do
   end
 
   def add_index_html_heex(igniter, domain, module) do
-    # inject live specific stuff
-    # create the path
-    # add modules with the code for the respective
-    # more deduction
-    # create index, show, form
     ash_table_component = table_component_name()
 
-    # module plural name
     module_plural_name = get_plural_module_name(module)
     id = "#{module_plural_name}_id"
     path = module_plural_name
@@ -44,8 +38,7 @@ defmodule Mix.Tasks.Helpdesk.Generate.LiveView.Index do
 
     attributes = resource_attributes(module) |> prune_attributes()
 
-    # remove attributes which are relationship, or embedded or array
-
+    # TODO remove attributes which are relationship, or embedded or array
     code_middle = """
     """
 
