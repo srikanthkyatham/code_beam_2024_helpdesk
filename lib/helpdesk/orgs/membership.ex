@@ -32,7 +32,7 @@ defmodule Helpdesk.Orgs.Membership do
     end
 
     update :assign do
-      accept [:user_id, :org_id]
+      accept [:role, :user_id, :org_id]
     end
   end
 
