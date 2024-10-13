@@ -98,7 +98,7 @@ defmodule Mix.Tasks.Helpdesk.Generate.LiveView.Index do
       :if={@live_action in [:new, :edit]}
       id="modal"
       show
-      on_cancel={JS.patch("#{inferred_path}")}
+      on_cancel={JS.patch("#{base_path}")}
     >
       <.live_component
         module={#{form_component_name}}
