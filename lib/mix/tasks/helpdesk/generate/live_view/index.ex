@@ -58,7 +58,6 @@ defmodule Mix.Tasks.Helpdesk.Generate.LiveView.Index do
       end)
 
     base_path = scope_path() <> "/" <> "#" <> "{" <> "@org_slug}/" <> module_plural_name
-    inferred_path = "#" <> "{" <> "@path}"
 
     inferred_record = "#" <> "{" <> "record.id" <> "}"
 
